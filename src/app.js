@@ -228,6 +228,38 @@ app.post('/api/clientes', verificarToken, esAdmin, async (req, res) => {
    }
 });
 
+app.put('/api/clientes/:id', verificarToken, esAdmin, async (req, res) => {
+   const { id } = req.params;
+   const { nombre, telefono, email, municipio } = req.body;
+   try {
+      const result = await db.query(
+         'UPDATE clientes SET nombre = $1, telefono = $2, email = $3, municipio = $4 WHERE id = $5 RETURNING *',
+         [nombre, telefono, email, municipio, id]
+      );
+      if (result.rows.length === 0) {
+         return res.status(404).json({ error: 'Cliente no encontrado' });
+      }
+      res.json(result.rows[0]);
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al actualizar el cliente' });
+   }
+});
+
+app.delete('/api/clientes/:id', verificarToken, esAdmin, async (req, res) => {
+   const { id } = req.params;
+   try {
+      const result = await db.query('DELETE FROM clientes WHERE id = $1 RETURNING *', [id]);
+      if (result.rows.length === 0) {
+         return res.status(404).json({ error: 'Cliente no encontrado' });
+      }
+      res.json({ message: 'Cliente eliminado correctamente' });
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar el cliente. Es posible que tenga ventas o reservas asociadas.' });
+   }
+});
+
 // insertar ventas
 app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
    console.log("Datos recibidos para venta:", req.body);

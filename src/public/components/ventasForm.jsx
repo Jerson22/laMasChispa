@@ -4,6 +4,7 @@ import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 export default function VentasForm() {
    const { id } = useParams();
    const [productos, setProductos] = useState([]);
+   const [clientes, setClientes] = useState([]);
 
    const [ventasForm, setVentasForm] = useState({
       name: '',
@@ -39,6 +40,7 @@ export default function VentasForm() {
    const [productSearch, setProductSearch] = useState('');
    const [showDropdown, setShowDropdown] = useState(false);
    const [selectedProduct, setSelectedProduct] = useState(null);
+   const [showClientDropdown, setShowClientDropdown] = useState(false);
 
    // Estados para token y navigate
    const navigate = useNavigate();
@@ -92,6 +94,7 @@ export default function VentasForm() {
          }
       };
       fetchProductos();
+      fetchClientes();
       fetchVenta();
    }, [id, token]);
 
@@ -126,6 +129,22 @@ export default function VentasForm() {
          setProductos([]);
       } finally {
          setLoading(false);
+      }
+   };
+
+   // Traer Clientes
+   const fetchClientes = async () => {
+      try {
+         const response = await fetch('/api/clientes', {
+            headers: { 'auth-token': token }
+         });
+         
+         if (response.ok) {
+            const data = await response.json();
+            setClientes(Array.isArray(data) ? data : []);
+         }
+      } catch (err) {
+         console.error('Error fetching clientes:', err);
       }
    };
 
@@ -173,6 +192,16 @@ export default function VentasForm() {
       setProductSearch(producto.name); // Muestra el nombre en el input de búsqueda
       setSelectedProduct(producto); // Guarda el objeto para renderizar la foto
       setShowDropdown(false); // Cierra el menú
+   };
+
+   // FUNCIÓN CUANDO SE SELECCIONA UN CLIENTE DEL DESPLEGABLE
+   const handleSelectCliente = (cliente) => {
+      setVentasForm({
+         ...ventasForm,
+         name: cliente.nombre,
+         telefono: cliente.telefono || ''
+      });
+      setShowClientDropdown(false);
    };
 
    // Para envio de Formulario
@@ -273,6 +302,13 @@ export default function VentasForm() {
       );
    });
 
+   const sugerenciasClientes = clientes.filter((c) => {
+      const term = ventasForm.name.toLowerCase();
+      return (
+         c.nombre && c.nombre.toLowerCase().includes(term)
+      );
+   });
+
 
    const handleEnviarRecibo = async (ventasForm) => {
       try {
@@ -317,16 +353,41 @@ export default function VentasForm() {
                <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
                   <div className="space-y-6 order-1 lg:order-none">
                      <div className="grid gap-6 sm:grid-cols-2">
-                        <div className="space-y-3">
-                           <label className="block text-sm font-semibold text-gray-600">Cliente</label>
+                        <div className="space-y-3 relative">
+                           <label className="block text-sm font-semibold text-gray-600">Cliente (Escribe para buscar)</label>
                            <input
                               type="text"
                               name="name"
                               value={ventasForm.name}
-                              onChange={handleVentasChange}
+                              onChange={(e) => {
+                                 handleVentasChange(e);
+                                 setShowClientDropdown(true);
+                              }}
+                              onFocus={() => setShowClientDropdown(true)}
+                              onBlur={() => setTimeout(() => setShowClientDropdown(false), 200)}
                               required
                               className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                            />
+                           
+                           {showClientDropdown && ventasForm.name.length > 0 && (
+                              <div className="absolute inset-x-0 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl">
+                                 {sugerenciasClientes.length > 0 ? (
+                                    sugerenciasClientes.map((c) => (
+                                       <button
+                                          key={c.id}
+                                          type="button"
+                                          onMouseDown={() => handleSelectCliente(c)}
+                                          className="flex w-full flex-col border-b border-gray-100 px-4 py-3 text-left transition hover:bg-pink-50"
+                                       >
+                                          <p className="text-sm font-semibold text-gray-800">{c.nombre}</p>
+                                          <p className="text-xs text-gray-500">{c.telefono || 'Sin teléfono'} · {c.email || 'Sin correo'}</p>
+                                       </button>
+                                    ))
+                                 ) : (
+                                    <div className="px-4 py-3 text-sm text-gray-500">No se encontraron clientes</div>
+                                 )}
+                              </div>
+                           )}
                         </div>
                         <div className="space-y-3">
                            <label className="block text-sm font-semibold text-gray-600">Teléfono</label>
