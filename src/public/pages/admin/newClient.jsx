@@ -410,7 +410,7 @@ const NewClient = () => {
                   </div>
                   <div className="input-group">
                      <label>Email</label>
-                     <input type="email" name="email" value={clientForm.email} onChange={handleClientChange} required />
+                     <input type="email" name="email" value={clientForm.email} onChange={handleClientChange} />
                   </div>
                   <div className="input-group">
                      <label>Municipio</label>

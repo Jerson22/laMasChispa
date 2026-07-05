@@ -1,3 +1,10 @@
+@import "tailwindcss";
+@source ".";
+
+html, body {
+   overflow-x: clip;
+}
+
 body {
    background-color: #f9a8d4;
    margin: 0;

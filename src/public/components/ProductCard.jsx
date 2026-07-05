@@ -60,21 +60,21 @@ export default function ProductCard({ product }) {
             )} */}
 
             <div className="product-badges">
-               {product.talla && (<span className="badge-talla">{product.talla}</span>)}
+               {product.talla && (<span className="badge-talla !text-[9px] md:!text-sm !px-1.5 md:!px-3 !py-0.5 md:!py-1">{product.talla}</span>)}
             </div>
          </div>
-         <div className="product-info" style={{ display: 'flex', flexDirection: 'column', width: '90%' }}>
+         <div className="product-info !p-2 md:!p-4" style={{ display: 'flex', flexDirection: 'column', width: '90%' }}>
     
             {/* 1. FILA SUPERIOR: El título ocupa todo el ancho */}
             <div className="product-title-row" style={{ width: '100%' }}>
-               <h3 className="product-nombre" style={{ margin: '0 0 4px 0' }}>{product.name}</h3>
+               <h3 className="product-nombre !text-[13px] md:!text-lg font-bold" style={{ margin: '0 0 4px 0', lineHeight: '1.2' }}>{product.name}</h3>
             </div>
 
             {/* 2. FILA INFERIOR: Detalles a la izquierda y botón a la derecha */}
             <div className="product-bottom-row" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                
                {/* DETALLES (Izquierda) */}
-               <div className="product-details" style={{ flex: '1' }}>
+               <div className="product-details !text-[11px] md:!text-sm leading-tight md:leading-normal" style={{ flex: '1' }}>
                   {product.color && <p style={{ margin: '2px 0' }}><strong>Color:</strong> {mayus(product.color)}</p>}
                   {product.talla && <p style={{ margin: '2px 0' }}><strong>Talla:</strong> {product.talla.toUpperCase()}</p>}
                </div>

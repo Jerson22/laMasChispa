@@ -307,343 +307,363 @@ export default function VentasForm() {
    };
 
    return (
-      <div className="admin-container">
-         <section className="form-section container">
-            {editandoFlag ? <h2>Tarjeta #{id}</h2> : <h2>Nueva Venta</h2>}
-            <form onSubmit={handleVentaSubmit} className="admin-form">
-               
-               <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-                  {/* columna izquierda */}
-                  <div style={{ flex: '0 0 calc(60% - 10px)' }}>
-                     <div className="input-group">
-                        <label>Cliente</label>
-                        <input type="text" name="name" value={ventasForm.name} onChange={handleVentasChange} required />
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+         <section className="rounded-[28px] bg-white p-4 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
+            <div className="mb-6">
+               <h2 className="text-2xl font-semibold text-gray-900">{editandoFlag ? `Tarjeta #${id}` : 'Nueva Venta'}</h2>
+            </div>
+
+            <form onSubmit={handleVentaSubmit} className="space-y-6">
+               <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                  <div className="space-y-6 order-1 lg:order-none">
+                     <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="space-y-3">
+                           <label className="block text-sm font-semibold text-gray-600">Cliente</label>
+                           <input
+                              type="text"
+                              name="name"
+                              value={ventasForm.name}
+                              onChange={handleVentasChange}
+                              required
+                              className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                        <div className="space-y-3">
+                           <label className="block text-sm font-semibold text-gray-600">Teléfono</label>
+                           <input
+                              type="text"
+                              name="telefono"
+                              value={ventasForm.telefono}
+                              onChange={handleVentasChange}
+                              required
+                              className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
                      </div>
-                     <div className="input-group">
-                        <label> Teléfono</label>
-                        <input type="text" name="telefono" value={ventasForm.telefono} onChange={handleVentasChange} required />
-                     </div>
-                     
-                     {/* NUEVO INPUT DE PRODUCTO INTERACTIVO */}
-                     <div className="input-group" style={{ position: 'relative' }}>
-                        <label>Producto (Escribe para buscar)</label>
-                        <input 
-                           type="text" 
-                           placeholder="Buscar por nombre, ID o talla..." 
-                           value={productSearch} 
+
+                     <div className="relative">
+                        <label className="block text-sm font-semibold text-gray-600">Producto (Escribe para buscar)</label>
+                        <input
+                           type="text"
+                           placeholder="Buscar por nombre, ID o talla..."
+                           value={productSearch}
                            onChange={(e) => {
                               setProductSearch(e.target.value);
                               setShowDropdown(true);
                            }}
                            onFocus={() => setShowDropdown(true)}
                            required
+                           className="mt-2 w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                         />
-                        
-                        {/* Menú desplegable con los resultados de la base de datos */}
+
                         {showDropdown && productSearch.length > 0 && (
-                           <div className="dropdown-productos">
+                           <div className="absolute inset-x-0 top-full z-30 mt-3 max-h-72 overflow-y-auto rounded-3xl border border-gray-200 bg-white shadow-2xl">
                               {sugerenciasProductos.length > 0 ? (
                                  sugerenciasProductos.map((p) => (
-                                    <div 
-                                       key={p.id} 
-                                       className="dropdown-item-producto"
+                                    <button
+                                       key={p.id}
+                                       type="button"
                                        onClick={() => handleSelectProduct(p)}
+                                       className="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left transition hover:bg-pink-50"
                                     >
-                                       {/* Ajusta p.imagen o la propiedad de tu BD donde guardes la URL de la foto */}
-                                       <img 
+                                       <img
                                           src={p.imagenes && p.imagenes[0] ? `/images/${p.imagenes[0]}` : 'https://via.placeholder.com/40x50?text=No+Img'}
-                                          alt={p.name} 
+                                          alt={p.name}
+                                          className="h-14 w-11 rounded-xl object-cover"
                                        />
-                                       <div>
-                                          <strong>{p.name}</strong>
-                                          <span>ID: {p.id} {p.talla ? `| Talla: ${p.talla}` : ''}</span>
+                                       <div className="min-w-0">
+                                          <p className="text-sm font-semibold text-gray-800">{p.name}</p>
+                                          <p className="text-xs text-gray-500">ID: {p.id}{p.talla ? ` · Talla: ${p.talla}` : ''}</p>
                                        </div>
-                                    </div>
+                                    </button>
                                  ))
                               ) : (
-                                 <div style={{ padding: '10px', color: '#888', fontSize: '0.9rem' }}>
-                                    No se encontraron productos
-                                 </div>
+                                 <div className="px-4 py-3 text-sm text-gray-500">No se encontraron productos</div>
                               )}
                            </div>
                         )}
                      </div>
 
-                     {/* VISTA PREVIA: Se muestra solo si ya se seleccionó un producto */}
                      {selectedProduct && (
-                        <div className="producto-preview-box">
-                           {console.log(selectedProduct.imagenes)}
-                           <img 
-                              src={selectedProduct.imagenes && selectedProduct.imagenes[0] ? `/images/${selectedProduct.imagenes[0]}` : 'https://via.placeholder.com/100x130?text=No+Foto'} 
-                              alt="Vista previa" 
+                        <div className="flex flex-col gap-4 rounded-[24px] border border-pink-100 bg-pink-50/70 p-4 shadow-sm sm:flex-row">
+                           <img
+                              src={selectedProduct.imagenes && selectedProduct.imagenes[0] ? `/images/${selectedProduct.imagenes[0]}` : 'https://via.placeholder.com/100x130?text=No+Foto'}
+                              alt="Vista previa"
+                              className="h-32 w-24 flex-none rounded-3xl object-cover"
                            />
-                           <div className="preview-details">
-                              <h4>{selectedProduct.name}</h4>
-                              {/* <p><strong>ID Seleccionado:</strong> {selectedProduct.id}</p> */}
-                              {selectedProduct.talla && <p><strong>Talla:</strong> {selectedProduct.talla}</p>}
-                              {selectedProduct.precio_vestido && <p><strong>Precio Vestido:</strong> ${selectedProduct.precio_vestido}</p>}
-                              {selectedProduct.precio_renta && <p><strong>Precio Renta:</strong> ${selectedProduct.precio_renta}</p>}
-                              {selectedProduct.precio_venta && <p><strong>Precio Venta:</strong> ${selectedProduct.precio_venta}</p>}
+                           <div className="space-y-1 text-sm text-gray-700">
+                              <h4 className="text-base font-semibold text-pink-700">{selectedProduct.name}</h4>
+                              {selectedProduct.talla && <p><span className="font-semibold text-gray-800">Talla:</span> {selectedProduct.talla}</p>}
+                              {selectedProduct.precio_vestido && <p><span className="font-semibold text-gray-800">Precio Vestido:</span> ${selectedProduct.precio_vestido}</p>}
+                              {selectedProduct.precio_renta && <p><span className="font-semibold text-gray-800">Precio Renta:</span> ${selectedProduct.precio_renta}</p>}
+                              {selectedProduct.precio_venta && <p><span className="font-semibold text-gray-800">Precio Venta:</span> ${selectedProduct.precio_venta}</p>}
                            </div>
                         </div>
                      )}
 
-                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px', marginTop: '15px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'normal', cursor: 'pointer', margin: 0 }}>
-                           <input type="checkbox" name="bolso" checked={ventasForm.bolso} onChange={handleVentasChange} />
+                     <div className="flex flex-wrap gap-4">
+                        <label className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 transition hover:border-pink-300">
+                           <input
+                              type="checkbox"
+                              name="bolso"
+                              checked={ventasForm.bolso}
+                              onChange={handleVentasChange}
+                              className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                           />
                            Bolso
                         </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'normal', cursor: 'pointer', margin: 0 }}>
-                           <input type="checkbox" name="aretes" checked={ventasForm.aretes} onChange={handleVentasChange} />
+                        <label className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 transition hover:border-pink-300">
+                           <input
+                              type="checkbox"
+                              name="aretes"
+                              checked={ventasForm.aretes}
+                              onChange={handleVentasChange}
+                              className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                           />
                            Aretes
                         </label>
                      </div>
-                     <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'normal', cursor: 'pointer', margin: 0 }}>
-                           <input type="checkbox" name="ajuste" checked={ventasForm.ajuste} onChange={handleVentasChange} />
+
+                     <div className="grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end">
+                        <label className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+                           <input
+                              type="checkbox"
+                              name="ajuste"
+                              checked={ventasForm.ajuste}
+                              onChange={handleVentasChange}
+                              className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                           />
                            Ajustes
                         </label>
-                        <input type="date" name="fechaAjuste" value={ventasForm.fechaAjuste} onChange={handleVentasChange} style={{ flex: 1 }} />
+                        <div className="space-y-2 min-w-0">
+                           <label className="block text-sm font-semibold text-gray-600">Fecha de Ajuste</label>
+                           <input
+                              type="date"
+                              name="fechaAjuste"
+                              value={ventasForm.fechaAjuste}
+                              onChange={handleVentasChange}
+                              className="block w-full max-w-full shrink appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              style={{ WebkitAppearance: 'none' }}
+                           />
+                        </div>
                      </div>
                   </div>
-                  
-                  {/* columna derecha */}
-                  <div style={{ flex: '0 0 calc(40% - 10px)' , display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                     <div className="input-group">
-                        <label>Fecha de Renta</label>
-                        <input type="date" name="fechaRenta" value={ventasForm.fechaRenta} onChange={handleVentasChange} required />
-                     </div>
-                     <div className="input-group">
-                        <label>Fecha de Entrega</label>
-                        <input type="date" name="fechaEntrega" value={ventasForm.fechaEntrega} onChange={handleVentasChange} />
-                     </div>
-                     <div className="input-group">
-                        <label>Fecha de Devolucion</label>
-                        <input type="date" name="fechaDevolucion" value={ventasForm.fechaDevolucion} onChange={handleVentasChange} />
-                     </div>
-                  </div>
-               </div>
-               {/* Seccion de ajustes */}
-               {ventasForm.ajuste && (
-                  <>
-                     <div style={{display: 'flex', gap:'30px', marginBottom: '30px'}}>
-                        <div>
-                           <label>Bastilla</label>
-                           <input type="text" name="bastilla" value={ventasForm.bastilla} onChange={handleVentasChange} />
-                           <label>Busto</label>
-                           <input type="text" name="busto" value={ventasForm.busto} onChange={handleVentasChange} />
-                        </div>
-                        <div>
-                           <label>Tirantes</label>
-                           <input type="text" name="tirantes" value={ventasForm.tirantes} onChange={handleVentasChange} />
-                           <label>Manga/Puño</label>
-                           <input type="text" name="mangaPuno" value={ventasForm.mangaPuno} onChange={handleVentasChange} />
-                        </div>
-                        <div>
-                           <label>Cintura</label>
-                           <input type="text" name="cintura" value={ventasForm.cintura} onChange={handleVentasChange} />
-                           <label>Espalda</label>
-                           <input type="text" name="espalda" value={ventasForm.espalda} onChange={handleVentasChange} />
-                        </div>
-                     </div>
-                  </>
-               )}
 
-               {/* FILA 2: Notas */}
-               <div style={{ marginBottom: '20px', borderTop: '2px solid #eee', paddingTop: '20px' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '10px', color: '#555' }}>Notas</label>
-                  <textarea name="notas" value={ventasForm.notas} onChange={handleVentasChange} placeholder="Opcional" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', minHeight: '80px', fontFamily: 'inherit' }} />
+                  <div className="space-y-6 order-3 lg:order-none">
+                     <div className="space-y-3 min-w-0">
+                        <label className="block text-sm font-semibold text-gray-600">Fecha de Renta</label>
+                        <input
+                           type="date"
+                           name="fechaRenta"
+                           value={ventasForm.fechaRenta}
+                           onChange={handleVentasChange}
+                           required
+                           className="block w-full max-w-full shrink appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           style={{ WebkitAppearance: 'none' }}
+                        />
+                     </div>
+                     <div className="space-y-3 min-w-0">
+                        <label className="block text-sm font-semibold text-gray-600">Fecha de Entrega</label>
+                        <input
+                           type="date"
+                           name="fechaEntrega"
+                           value={ventasForm.fechaEntrega}
+                           onChange={handleVentasChange}
+                           className="block w-full max-w-full shrink appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           style={{ WebkitAppearance: 'none' }}
+                        />
+                     </div>
+                     <div className="space-y-3 min-w-0">
+                        <label className="block text-sm font-semibold text-gray-600">Fecha de Devolución</label>
+                        <input
+                           type="date"
+                           name="fechaDevolucion"
+                           value={ventasForm.fechaDevolucion}
+                           onChange={handleVentasChange}
+                           className="block w-full max-w-full shrink appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           style={{ WebkitAppearance: 'none' }}
+                        />
+                     </div>
+                  </div>
+
+                  {ventasForm.ajuste && (
+                     <div className="grid gap-4 rounded-[28px] border border-gray-200 bg-gray-50 p-6 md:grid-cols-3 order-2 lg:order-none lg:col-span-2">
+                     <div className="space-y-3">
+                        <div>
+                           <label className="block text-sm font-semibold text-gray-600">Bastilla</label>
+                           <input
+                              type="text"
+                              name="bastilla"
+                              value={ventasForm.bastilla}
+                              onChange={handleVentasChange}
+                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                        <div>
+                           <label className="block text-sm font-semibold text-gray-600">Busto</label>
+                           <input
+                              type="text"
+                              name="busto"
+                              value={ventasForm.busto}
+                              onChange={handleVentasChange}
+                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                     </div>
+
+                     <div className="space-y-3">
+                        <div>
+                           <label className="block text-sm font-semibold text-gray-600">Tirantes</label>
+                           <input
+                              type="text"
+                              name="tirantes"
+                              value={ventasForm.tirantes}
+                              onChange={handleVentasChange}
+                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                        <div>
+                           <label className="block text-sm font-semibold text-gray-600">Manga/Puño</label>
+                           <input
+                              type="text"
+                              name="mangaPuno"
+                              value={ventasForm.mangaPuno}
+                              onChange={handleVentasChange}
+                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                     </div>
+
+                     <div className="space-y-3">
+                        <div>
+                           <label className="block text-sm font-semibold text-gray-600">Cintura</label>
+                           <input
+                              type="text"
+                              name="cintura"
+                              value={ventasForm.cintura}
+                              onChange={handleVentasChange}
+                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                        <div>
+                           <label className="block text-sm font-semibold text-gray-600">Espalda</label>
+                           <input
+                              type="text"
+                              name="espalda"
+                              value={ventasForm.espalda}
+                              onChange={handleVentasChange}
+                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           />
+                        </div>
+                     </div>
+                  </div>
+               )}
                </div>
-               
-               {/* FILA 3: Anticipo y Total */}
-               <div style={{ display: 'flex', gap: '20px', borderTop: '2px solid #eee', paddingTop: '20px' }}>
-                  <div style={{ flex: '1' }} className="input-groupA">
-                     <h3>Anticipo</h3>
-                     <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555' }}>Efectivo</label>
-                     <input type="number" name="anticipoEfectivo" value={ventasForm.anticipoEfectivo} onChange={handleVentasChange} />
-                     <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555' }}>Tarjeta</label>
-                     <input type="number" name="anticipoTarjeta" value={ventasForm.anticipoTarjeta} onChange={handleVentasChange} />
+
+               <div className="space-y-4  border-t border-gray-200 pt-6">
+                  <div className="space-y-3">
+                     <label className="block text-sm font-semibold text-gray-600">Notas</label>
+                     <textarea
+                        name="notas"
+                        value={ventasForm.notas}
+                        onChange={handleVentasChange}
+                        placeholder="Opcional"
+                        className="min-h-[112px] w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                     />
                   </div>
-                  <div style={{ flex: '1' }} className="input-groupA">
-                     <h3>{selectedProduct ? `Pendiente $${Number(selectedProduct.precio_renta) - Number(ventasForm.anticipoEfectivo) - Number(ventasForm.anticipoTarjeta)}` : 'Pendiente'}</h3>
-                     <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555' }}>Efectivo</label>
-                     <input type="number" name="pendienteEfectivo" value={ventasForm.pendienteEfectivo} onChange={handleVentasChange} />
-                     <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#555' }}>Tarjeta</label>
-                     <input type="number" name="pendienteTarjeta" value={ventasForm.pendienteTarjeta} onChange={handleVentasChange} />
-                  </div>
-                  <div>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'normal', cursor: 'pointer', margin: 0 }}>
-                        <input type="checkbox" name="liquidado" checked={ventasForm.liquidado} onChange={handleVentasChange} />
-                        Liquidado
-                     </label>
+
+                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                     <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
+                        <h3 className="mb-4 text-base font-semibold text-gray-900">Anticipo</h3>
+                        <div className="space-y-4">
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
+                              <input
+                                 type="number"
+                                 name="anticipoEfectivo"
+                                 value={ventasForm.anticipoEfectivo}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
+                              <input
+                                 type="number"
+                                 name="anticipoTarjeta"
+                                 value={ventasForm.anticipoTarjeta}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
+                        <h3 className="mb-4 text-base font-semibold text-gray-900">{selectedProduct ? `Pendiente $${Number(selectedProduct.precio_renta) - Number(ventasForm.anticipoEfectivo || 0) - Number(ventasForm.anticipoTarjeta || 0)}` : 'Pendiente'}</h3>
+                        <div className="space-y-4">
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
+                              <input
+                                 type="number"
+                                 name="pendienteEfectivo"
+                                 value={ventasForm.pendienteEfectivo}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
+                              <input
+                                 type="number"
+                                 name="pendienteTarjeta"
+                                 value={ventasForm.pendienteTarjeta}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="flex items-center justify-center rounded-[28px] border border-gray-200 bg-gray-50 p-5">
+                        <label className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
+                           <input
+                              type="checkbox"
+                              name="liquidado"
+                              checked={ventasForm.liquidado}
+                              onChange={handleVentasChange}
+                              className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                           />
+                           Liquidado
+                        </label>
+                     </div>
                   </div>
                </div>
-               
-               <div className="form-actions">
-                  <button type="submit" className="save-btn">
-                     {editandoFlag ? 'Guardar Cambios' : 'Registrar Renta' }
+
+               <div className="flex flex-col gap-4 sm:flex-row">
+                  <button
+                     type="submit"
+                     className="inline-flex w-full items-center justify-center rounded-full bg-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
+                  >
+                     {editandoFlag ? 'Guardar Cambios' : 'Registrar Renta'}
                   </button>
-                  <button type="button" className='save-btn' onClick={() => handleEnviarRecibo(ventasForm)}>
+                  <button
+                     type="button"
+                     onClick={() => handleEnviarRecibo(ventasForm)}
+                     className="inline-flex w-full items-center justify-center rounded-full border border-pink-600 bg-white px-6 py-3 text-sm font-semibold text-pink-700 transition hover:bg-pink-50 sm:w-auto"
+                  >
                      Generar Recibo
                   </button>
                </div>
             </form>
          </section>
 
-         {/* CERRAR DROPDOWN SI SE HACE CLICK FUERA */}
          {showDropdown && (
-            <div 
-               style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1 }} 
-               onClick={() => setShowDropdown(false)} 
+            <div
+               className="fixed inset-0 z-20 bg-transparent"
+               onClick={() => setShowDropdown(false)}
             />
          )}
-
-         <style>{`
-            .input-groupA {
-               border: 1px solid #6d6d6d;
-               padding: 15px;
-               border-radius: 10px;
-            }
-            .admin-container {
-               max-width: 1000px;
-               margin: 10px auto;
-               padding: 10px;
-            }
-            .form-section {
-               background: white;
-               padding: 30px;
-               border-radius: 15px;
-               box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-               margin-bottom: 40px;
-            }
-            
-            /* NUEVOS ESTILOS PARA EL DESPLEGABLE DE PRODUCTOS */
-            .dropdown-productos {
-               position: absolute;
-               top: 100%;
-               left: 0;
-               width: 100%;
-               background: white;
-               border: 1px solid #ddd;
-               border-radius: 8px;
-               box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-               max-height: 250px;
-               overflow-y: auto;
-               z-index: 10;
-            }
-            .dropdown-item-producto {
-               display: flex;
-               align-items: center;
-               padding: 8px 12px;
-               cursor: pointer;
-               border-bottom: 1px solid #f5f5f5;
-               transition: background 0.2s;
-            }
-            .dropdown-item-producto:hover {
-               background: #fdf2f8;
-            }
-            .dropdown-item-producto img {
-               width: 80px;
-               height: 100px;
-               object-fit: cover;
-               border-radius: 4px;
-               margin-right: 12px;
-            }
-            .dropdown-item-producto div {
-               display: flex;
-               flex-direction: column;
-            }
-            .dropdown-item-producto strong {
-               font-size: 0.95rem;
-               color: #333;
-            }
-            .dropdown-item-producto span {
-               font-size: 0.8rem;
-               color: #777;
-            }
-
-            /* ESTILOS PARA LA TARJETA DE VISTA PREVIA */
-            .producto-preview-box {
-               display: flex;
-               align-items: center;
-               gap: 15px;
-               background: #fdf2f8;
-               border: 1px dashed #db2777;
-               padding: 12px;
-               border-radius: 10px;
-               margin-top: 15px;
-            }
-            .producto-preview-box img {
-               width: 150px;
-               height: 200px;
-               object-fit: cover;
-               border-radius: 6px;
-               box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            }
-            .preview-details h4 {
-               margin: 0 0 5px 0;
-               color: #db2777;
-               font-size: 1.05rem;
-            }
-            .preview-details p {
-               margin: 2px 0;
-               font-size: 0.9rem;
-               color: #555;
-            }
-
-            .admin-form label {
-               display: block;
-               font-size: 0.9rem;
-               font-weight: bold;
-               margin-bottom: 5px;
-               color: #555;
-            }
-            .admin-form input:not([type="radio"]), .admin-form textarea {
-               width: 100%;
-               padding: 10px;
-               border: 1px solid #ddd;
-               border-radius: 8px;
-               outline: none;
-               box-sizing: border-box;
-            }
-            .form-actions {
-               margin-top: 25px;
-               display: flex;
-               gap: 10px;
-            }
-            .save-btn {
-               background: #db2777;
-               color: white;
-               border: none;
-               padding: 12px 25px;
-               border-radius: 8px;
-               font-weight: bold;
-               cursor: pointer;
-            }
-            @media (max-width: 768px) {
-               .admin-container { margin: 20px auto; padding: 10px; }
-               .form-section { padding: 20px; }
-               .save-btn { width: 100%; }
-            }
-               /* Modifica esta regla para excluir también los checkboxes */
-            .admin-form input:not([type="radio"]):not([type="checkbox"]), .admin-form textarea {
-               width: 100%;
-               padding: 10px;
-               border: 1px solid #ddd;
-               border-radius: 8px;
-               outline: none;
-               box-sizing: border-box;
-            }
-
-            /* Agrega esta nueva regla abajo para domar a Safari */
-            .admin-form input[type="checkbox"] {
-               width: auto;
-               max-width: 18px;
-               height: 18px;
-               margin: 0;
-               cursor: pointer;
-            }
-         `}</style>
       </div>
    );
 };

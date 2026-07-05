@@ -404,11 +404,11 @@ const Inventario = () => {
                   placeholder="Buscar por ID, nombre, tipo o talla..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ padding: '10px 15px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px', outline: 'none' }}
+                  style={{ padding: '10px 15px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px', outline: 'none', backgroundColor: 'white' }}
                />
             </div>
-            <div className="admin-table-container">
-               <table className="admin-table">
+            <div className="admin-table-container" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+               <table className="admin-table" style={{ minWidth: '800px' }}>
                   <thead>
                      <tr>
                         <th>ID</th>
@@ -440,7 +440,7 @@ const Inventario = () => {
                      ))
                      ) : (
                         <tr>
-                           <td colSpan="7" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No se encontraron productos con esa búsqueda.</td>
+                           <td colSpan="8" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No se encontraron productos con esa búsqueda.</td>
                         </tr>
                      )}
                   </tbody>

@@ -2,6 +2,7 @@
   "main": "src/app.js",
   "type": "module",
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.2",
     "axios": "^1.7.7",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
@@ -13,7 +14,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.6.0",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "tailwindcss": "^4.3.2"
   },
   "scripts": {
     "start": "node src/app.js",

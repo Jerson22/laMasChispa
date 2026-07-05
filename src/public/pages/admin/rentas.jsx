@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdEdit, MdDelete } from "react-icons/md";
+import { AiOutlineClear } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
 
 // 💡 FUNCIÓN ASISTENTE CORREGIDA: Extrae estrictamente la fecha textual (YYYY-MM-DD) e ignora la zona horaria
@@ -20,6 +21,7 @@ const formatearFechaSafe = (fechaString, opciones) => {
 
 export default function Rentas() {
    const [rentas, setRentas] = useState([]);
+   const [resumenAbierto, setResumenAbierto] = useState(null);
    const navigate = useNavigate();
 
    const [filtros, setFiltros] = useState({
@@ -28,6 +30,8 @@ export default function Rentas() {
       fechaInicio: '',          
       fechaFin: ''              
    });
+   const [searchQuery, setSearchQuery] = useState('');
+   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
    useEffect(() => {
       const token = localStorage.getItem('token');
@@ -60,6 +64,13 @@ export default function Rentas() {
       if (!Array.isArray(rentas)) return []; 
 
       const filtradas = rentas.filter((renta) => {
+         if (searchQuery.trim() !== '') {
+            const searchLower = searchQuery.toLowerCase();
+            const matchName = renta.name && renta.name.toLowerCase().includes(searchLower);
+            const matchProduct = renta.producto_nombre && renta.producto_nombre.toLowerCase().includes(searchLower);
+            if (!matchName && !matchProduct) return false;
+         }
+
          if (filtros.tipoFecha !== 'todas' && !renta[filtros.tipoFecha]) {
             return false; 
          }
@@ -180,16 +191,42 @@ export default function Rentas() {
       }
    };
 
-   return (
-      <div className="rentas-container">
-         <h1>Rentas</h1>
-         <p>{rentasFiltradas.length} rentas encontradas</p>
+   const clearFilters = () => {
+      setSearchQuery('');
+      setFiltros({
+         tipoFecha: 'todas',        
+         preset: 'todos',          
+         fechaInicio: '',          
+         fechaFin: ''              
+      });
+   };
 
-         <div className="filtros-container-bar">
-            <div className="filtro-grupo">
-               <label>¿Qué fecha revisar?</label>
-               <select 
-                  className="select-estado-neumorphic"
+   return (
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+
+         <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-pink-100 bg-white/90 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-6">
+            <div className="flex flex-1 flex-col gap-2 w-full sm:w-auto">
+               <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-gray-500">Buscar por cliente o vestido</label>
+                  <button 
+                     className="text-xs font-semibold text-pink-600 sm:hidden"
+                     onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+                  >
+                     {showFiltersMobile ? 'Ocultar filtros' : 'Filtros de fecha'}
+                  </button>
+               </div>
+               <input
+                  type="text"
+                  placeholder="Ej. María o Sirena..."
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200 sm:min-w-[220px]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+               />
+            </div>
+            <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-2`}>
+               <label className="text-sm font-semibold text-gray-500">¿Qué fecha revisar?</label>
+               <select
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200 sm:min-w-[220px]"
                   value={filtros.tipoFecha}
                   onChange={(e) => setFiltros({ ...filtros, tipoFecha: e.target.value })}
                >
@@ -201,10 +238,10 @@ export default function Rentas() {
                </select>
             </div>
 
-            <div className="filtro-grupo">
-               <label>Rango de Tiempo</label>
-               <select 
-                  className="select-estado-neumorphic"
+            <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-2`}>
+               <label className="text-sm font-semibold text-gray-500">Rango de Tiempo</label>
+               <select
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200 sm:min-w-[220px]"
                   value={filtros.preset}
                   onChange={(e) => setFiltros({ ...filtros, preset: e.target.value })}
                >
@@ -216,518 +253,275 @@ export default function Rentas() {
             </div>
 
             {filtros.preset === 'personalizado' && (
-               <div className="filtro-grupo-fechas">
-                  <div>
-                     <label>Desde:</label>
-                     <input 
-                        type="date" 
-                        className="select-estado-neumorphic input-fecha"
+               <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-3`}>
+                  <div className="flex flex-1 flex-col gap-2">
+                     <label className="text-sm font-semibold text-gray-500">Desde:</label>
+                     <input
+                        type="date"
+                        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
                         value={filtros.fechaInicio}
                         onChange={(e) => setFiltros({ ...filtros, fechaInicio: e.target.value })}
                      />
                   </div>
-                  <div>
-                     <label>Hasta:</label>
-                     <input 
-                        type="date" 
-                        className="select-estado-neumorphic input-fecha"
+                  <div className="flex flex-1 flex-col gap-2">
+                     <label className="text-sm font-semibold text-gray-500">Hasta:</label>
+                     <input
+                        type="date"
+                        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
                         value={filtros.fechaFin}
                         onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
                      />
                   </div>
                </div>
             )}
+            <button
+               className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex w-full sm:w-auto h-[38px] items-center justify-center gap-2 rounded-xl bg-pink-100 px-4 py-2 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-200 shadow-sm`}
+               onClick={clearFilters}
+            >
+               <AiOutlineClear />
+               <span>Limpiar</span>
+            </button>
          </div>
 
-         <table className="rentas-table">
-            <thead>
-               <tr>
-                  <th>ID</th>
-                  <th style={{ textAlign: 'center' }}>Liquidado</th> 
-                  <th>Vestido</th>
-                  <th>Fecha de Entrega</th>
-                  <th>Estado</th>
-                  <th>Fecha de Devolución</th>
-                  <th>Acciones</th>
-               </tr>
-            </thead>
-            <tbody>
-               {Array.isArray(rentasFiltradas) && rentasFiltradas.map((renta, index) => {
-                  
-                  const nombreVestido = renta.producto_nombre ? renta.producto_nombre : 'No especificado / Cargando...';
-                  const precioDeRenta = renta.precio_renta ? Number(renta.precio_renta || 0) : 0;
+         <div className="mb-3 px-1">
+            <p className="text-sm font-medium text-gray-600">{rentasFiltradas.length} rentas encontradas</p>
+         </div>
 
-                  const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0);
-                  const faltaPorPagarCalculado = precioDeRenta - totalAnticipos;
+         <div className="hidden overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm md:block">
+            <table className="min-w-full border-collapse text-left">
+               <thead>
+                  <tr className="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600">
+                     <th className="px-4 py-3">ID</th>
+                     <th className="px-4 py-3 text-center">Liquidado</th>
+                     <th className="px-4 py-3">Vestido</th>
+                     <th className="px-4 py-3">Cliente</th>
+                     <th className="px-4 py-3">Fecha de Entrega</th>
+                     <th className="px-4 py-3">Estado</th>
+                     <th className="px-4 py-3">Fecha de Devolución</th>
+                     <th className="px-4 py-3">Acciones</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {Array.isArray(rentasFiltradas) && rentasFiltradas.map((renta, index) => {
+                     const nombreVestido = renta.producto_nombre ? renta.producto_nombre : 'No especificado / Cargando...';
+                     const precioDeRenta = renta.precio_renta ? Number(renta.precio_renta || 0) : 0;
+                     const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0);
+                     const faltaPorPagarCalculado = precioDeRenta - totalAnticipos;
+                     const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
+                     const tieneAjuste = renta.ajuste === true || renta.ajuste === 1 || renta.ajuste === '1' || renta.ajuste === 'true';
+                     const tieneNotas = renta.notes || renta.notas;
+                     const mostrarHaciaArriba = index >= rentasFiltradas.length - 2;
+                     const abiertoDesktop = resumenAbierto === renta.id;
 
-                  const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
-                  const tieneAjuste = renta.ajuste === true || renta.ajuste === 1 || renta.ajuste === '1' || renta.ajuste === 'true';
-                  const tieneNotas = renta.notes || renta.notas;
+                     return (
+                        <tr key={renta.id} className="border-b border-gray-100 last:border-b-0 hover:bg-pink-100 transition-colors">
+                           <td className="relative px-4 py-4">
+                              <button
+                                 type="button"
+                                 className="inline-block text-sm font-bold text-pink-600 transition-all duration-300 hover:text-pink-800 hover:scale-125 focus:outline-none"
+                                 onClick={() => setResumenAbierto(abiertoDesktop ? null : renta.id)}
+                              >
+                                 {renta.id}
+                              </button>
 
-                  const mostrarHaciaArriba = index >= 1;
-
-                  return (
-                     <tr key={renta.id}>
-                        <td className="id-cell-tooltip">
-                           <span className="id-number">{renta.id}</span>
-                           
-                           <div className={`tooltip-box ${mostrarHaciaArriba ? 'up' : ''}`}>
-                              <h4>Resumen de Renta {renta.id}</h4>
-                              
-                              <div className="tooltip-content-grid">
-                                 <div className="tooltip-col">
-                                    <p className="tooltip-seccion-titulo">📏 Ajustes de Costura</p>
-                                    
-                                    {tieneAjuste && renta.fechaAjuste && (
-                                       <p className="tooltip-fecha-ajuste-top">
-                                          📅 <strong>Cita de ajuste:</strong> {formatearFechaSafe(renta.fechaAjuste, {day: 'numeric', month: 'short'})}
-                                       </p>
-                                    )}
-
-                                    {tieneAjuste ? (
-                                       <div className="tooltip-grid">
-                                          <p><strong>Bastilla:</strong> {renta.bastilla || '—'}</p>
-                                          <p><strong>Busto:</strong> {renta.busto || '—'}</p>
-                                          <p><strong>Tirantes:</strong> {renta.tirantes || '—'}</p>
-                                          <p><strong>Manga/P:</strong> {renta.mangaPuno || '—'}</p>
-                                          <p><strong>Cintura:</strong> {renta.cintura || '—'}</p>
-                                          <p><strong>Espalda:</strong> {renta.espalda || '—'}</p>
+                              {abiertoDesktop ? (
+                                 <>
+                                    <button
+                                       type="button"
+                                       className="fixed inset-0 z-40 bg-black/30 md:block"
+                                       onClick={() => setResumenAbierto(null)}
+                                       aria-label="Cerrar resumen"
+                                    />
+                                    <div className="fixed left-1/2 top-[130px] z-50 mx-auto max-h-[calc(100vh-180px)] w-[min(90vw,60rem)] -translate-x-1/2 overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl md:block">
+                                       <div className="mb-3 flex items-start justify-between gap-3 border-b border-pink-100 pb-2">
+                                          <h4 className="text-base font-semibold text-pink-600">Resumen de Renta {renta.id}</h4>
+                                          <button
+                                             type="button"
+                                             className="rounded-full border border-gray-200 bg-gray-50 px-2 py-1 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+                                             onClick={() => setResumenAbierto(null)}
+                                          >
+                                             ✕
+                                          </button>
                                        </div>
-                                    ) : (
-                                       <p className="no-ajustes-text">❌ Sin modificaciones de costura.</p>
-                                    )}
-                                 </div>
+                                       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                          <div>
+                                             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">📏 Ajustes</p>
+                                             {tieneAjuste && renta.fechaAjuste ? (
+                                                <p className="mb-2 inline-block rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700">📅 {formatearFechaSafe(renta.fechaAjuste, { day: 'numeric', month: 'short' })}</p>
+                                             ) : null}
+                                             {tieneAjuste ? (
+                                                <div className="grid grid-cols-2 gap-2 rounded-lg bg-gray-50 p-2 text-xs text-gray-600">
+                                                   <p><strong>Bastilla:</strong> {renta.bastilla || '—'}</p>
+                                                   <p><strong>Busto:</strong> {renta.busto || '—'}</p>
+                                                   <p><strong>Tirantes:</strong> {renta.tirantes || '—'}</p>
+                                                   <p><strong>Manga/P:</strong> {renta.mangaPuno || '—'}</p>
+                                                   <p><strong>Cintura:</strong> {renta.cintura || '—'}</p>
+                                                   <p><strong>Espalda:</strong> {renta.espalda || '—'}</p>
+                                                </div>
+                                             ) : (
+                                                <p className="rounded-lg bg-gray-50 p-2 text-xs text-gray-500">❌ Sin modificaciones de costura.</p>
+                                             )}
+                                          </div>
 
-                                 <div className="tooltip-col">
-                                    <p className="tooltip-seccion-titulo">Vestido</p>
-                                    <p className="tooltip-vestido-nombre">✨ {nombreVestido}</p>
-                                    <img src={`/images/${renta.imagen_nombre}`} style={{width:'150px', borderRadius:'10px'}} alt="Vestido"/>
-                                 </div>
+                                          <div className="md:max-w-[220px]">
+                                             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">Vestido</p>
+                                             <p className="mb-2 rounded-lg bg-pink-50 px-2 py-1 text-sm font-semibold text-pink-700">✨ {nombreVestido}</p>
+                                             <div className="aspect-[5/7] w-full overflow-hidden rounded-xl bg-gray-100">
+                                                <img className="h-full w-full object-cover" src={renta.imagen_nombre ? `/images/${renta.imagen_nombre}` : '/images/default.jpg'} alt="Vestido" />
+                                             </div>
+                                          </div>
 
-                                 <div className="tooltip-col">
-                                    <p className="tooltip-seccion-titulo">📍 Cliente</p>
-                                    <div style={{background: '#fdecfa', fontSize:'0.8rem', padding:'10px', borderRadius:'8px'}}>
-                                       <p><strong>Nombre: </strong>{renta.name}</p>
-                                       <p><strong>Teléfono: </strong>{renta.telefono}</p>
-                                       <p><strong>Fecha Renta: </strong>{formatearFechaSafe(renta.fechaRenta, opciones)}</p>
-                                    </div>
-                                    <p className="tooltip-seccion-titulo">💰 Finanzas y Cuenta</p>
-                                    <div className="tooltip-finanzas-box">
-                                       <p><strong>Precio Renta:</strong> ${precioDeRenta}</p> 
-                                       <p style={{ marginTop: '4px' }}><strong>Anticipo Total:</strong> ${totalAnticipos}</p>
-                                       <span className="tooltip-finanzas-desglose">
-                                          (Efec: ${renta.anticipoEfectivo || 0} | Tarj: ${renta.anticipoTarjeta || 0})
-                                       </span>
-                                       <div className="tooltip-restante-row">
-                                          <strong>Falta por pagar:</strong> 
-                                          <span className="restante-monto">${faltaPorPagarCalculado}</span>
+                                          <div>
+                                             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">📍 Cliente</p>
+                                             <div className="mb-3 rounded-lg bg-pink-50/70 p-2 text-sm text-gray-700">
+                                                <p><strong>Nombre:</strong> {renta.name}</p>
+                                                <p><strong>Teléfono:</strong> {renta.telefono}</p>
+                                                <p><strong>Fecha Renta:</strong> {formatearFechaSafe(renta.fechaRenta, opciones)}</p>
+                                                <p><strong>Fecha Entrega:</strong> {formatearFechaSafe(renta.fechaEntrega, opciones)}</p>
+                                                <p><strong>Fecha Devolución:</strong> {formatearFechaSafe(renta.fechaDevolucion, opciones)}</p>
+                                             </div>
+                                             <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-2 text-sm text-gray-700">
+                                                <p><strong>Precio Renta:</strong> ${precioDeRenta}</p>
+                                                <p className="mt-1"><strong>Anticipo Total:</strong> ${totalAnticipos}</p>
+                                                <p className="mt-1 text-xs text-emerald-700">(Efec: ${renta.anticipoEfectivo || 0} | Tarj: ${renta.anticipoTarjeta || 0})</p>
+                                                <div className="mt-2 flex items-center justify-between border-t border-emerald-100 pt-2 text-sm font-semibold">
+                                                   <span>Falta por pagar:</span>
+                                                   <span className="text-red-600">${faltaPorPagarCalculado}</span>
+                                                </div>
+                                             </div>
+                                          </div>
+
+                                          <div>
+                                             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">👜 Complementos</p>
+                                             <div className="mb-3 grid grid-cols-2 gap-2 rounded-lg bg-gray-50 p-2 text-xs text-gray-600">
+                                                <p><strong>Bolso:</strong> {renta.bolso || '—'}</p>
+                                                <p><strong>Aretes:</strong> {renta.aretes || '—'}</p>
+                                             </div>
+                                             {tieneNotas ? (
+                                                <div className="rounded-lg border border-amber-100 bg-amber-50 p-2">
+                                                   <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.2em] text-amber-700">📝 Notas</p>
+                                                   <p className="max-h-24 overflow-y-auto text-sm text-amber-900">{renta.notes || renta.notas}</p>
+                                                </div>
+                                             ) : null}
+                                          </div>
                                        </div>
                                     </div>
-                                 </div>
+                                 </>
+                              ) : null}
+                           </td>
 
-                                 <div className="tooltip-col">
-                                    <p className="tooltip-seccion-titulo">👜 Complementos</p>
-                                    <div className="tooltip-grid-mini" style={{ marginBottom: tieneNotas ? '14px' : '0' }}>
-                                       <p><strong>Bolso:</strong> {renta.bolso || '—'}</p>
-                                       <p><strong>Aretes:</strong> {renta.aretes || '—'}</p>
-                                    </div>
-
-                                    {tieneNotas ? (
-                                       <div className="tooltip-notas-container-inline">
-                                          <p className="tooltip-seccion-titulo">📝 Notas Generales</p>
-                                          <p className="notas-texto">{renta.notes || renta.notas}</p>
-                                       </div>
-                                    ) : null}
-                                 </div>
+                           <td className="px-4 py-4 text-center">
+                              <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${esLiquidado ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                 {esLiquidado ? '✔' : '✕'}
+                              </span>
+                           </td>
+                           <td className="px-4 py-4 text-sm text-gray-700">{renta.producto_nombre}</td>
+                           <td className="px-4 py-4 text-sm text-gray-700">{renta.name}</td>
+                           <td className="px-4 py-4 text-sm text-gray-700">{formatearFechaSafe(renta.fechaEntrega, opciones)}</td>
+                           <td className="px-4 py-4">
+                              <select
+                                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                                 value={renta.estado}
+                                 onChange={(e) => handleEstadoChange(renta.id, e.target.value)}
+                              >
+                                 <option value="cita de ajustes">Cita de Ajustes</option>
+                                 <option value="ajustes">Ajustes</option>
+                                 <option value="planchado">Planchado</option>
+                                 <option value="entregado">Entregado</option>
+                                 <option value="devolucion">Devolucion</option>
+                                 <option value="tintoreria">Tintorería</option>
+                                 <option value="en tienda">En tienda</option>
+                              </select>
+                           </td>
+                           <td className="px-4 py-4 text-sm text-gray-700">{formatearFechaSafe(renta.fechaDevolucion, opciones)}</td>
+                           <td className="px-4 py-4">
+                              <div className="flex items-center gap-2">
+                                 <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-gray-600 shadow-sm transition hover:bg-pink-50 hover:text-pink-600" onClick={() => navigate(`/admin/renta/${renta.id}`)}>
+                                    <MdEdit />
+                                 </button>
+                                 <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-gray-600 shadow-sm transition hover:bg-rose-50 hover:text-rose-600" onClick={() => handleDelete(renta.id)}>
+                                    <MdDelete />
+                                 </button>
                               </div>
-                           </div>
-                        </td>
+                           </td>
+                        </tr>
+                     );
+                  })}
+               </tbody>
+            </table>
+         </div>
 
-                        <td style={{ textAlign: 'center' }}>
-                           <span className={`icono-liquidado-neumorphic ${esLiquidado ? 'pagado' : 'pendiente'}`}>
-                              {esLiquidado ? '✔' : '✕'}
-                           </span>
-                        </td>
+         <div className="space-y-3 md:hidden">
+            {Array.isArray(rentasFiltradas) && rentasFiltradas.map((renta) => {
+               const nombreVestido = renta.producto_nombre ? renta.producto_nombre : 'No especificado / Cargando...';
+               const precioDeRenta = renta.precio_renta ? Number(renta.precio_renta || 0) : 0;
+               const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0);
+               const faltaPorPagarCalculado = precioDeRenta - totalAnticipos;
+               const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
+               const tieneAjuste = renta.ajuste === true || renta.ajuste === 1 || renta.ajuste === '1' || renta.ajuste === 'true';
+               const tieneNotas = renta.notes || renta.notas;
+               const abierto = resumenAbierto === renta.id;
 
-                        <td>{renta.producto_nombre}</td>
-                        <td>{formatearFechaSafe(renta.fechaEntrega, opciones)}</td>
-                        
-                        <td>
-                           <select 
-                              className="select-estado-neumorphic"
-                              value={renta.estado} 
-                              onChange={(e) => handleEstadoChange(renta.id, e.target.value)}
-                           >
-                              <option value="cita de ajustes">Cita de Ajustes</option>
-                              <option value="ajustes">Ajustes</option>
-                              <option value="planchado">Planchado</option>
-                              <option value="entregado">Entregado</option>
-                              <option value="devolucion">Devolucion</option>
-                              <option value="tintoreria">Tintorería</option>
-                              <option value="en tienda">En tienda</option>
-                           </select>
-                        </td>
-                        
-                        <td>{formatearFechaSafe(renta.fechaDevolucion, opciones)}</td>
+               return (
+                  <div key={renta.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                     <div className="flex items-start justify-between gap-3">
+                        <div>
+                           <p className="text-sm font-semibold text-pink-600">Renta #{renta.id}</p>
+                           <p className="mt-1 text-sm font-medium text-gray-800">{nombreVestido}</p>
+                           <p className="text-xs text-gray-500">{renta.name}</p>
+                        </div>
+                        <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${esLiquidado ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                           {esLiquidado ? '✔' : '✕'}
+                        </span>
+                     </div>
 
-                        <td>
-                           <div className="acciones-container">
-                              <button className="btn-neumorphic edit-btn" onClick={() => navigate(`/admin/renta/${renta.id}`)}>
-                                 <MdEdit />
-                              </button>
-                              <button className="btn-neumorphic delete-btn" onClick={() => handleDelete(renta.id)}>
-                                 <MdDelete />
-                              </button>
-                           </div>
-                        </td>
-                     </tr>
-                  );
-               })}
-            </tbody>
-         </table>
+                     <div className="mt-3 grid gap-2 text-sm text-gray-600">
+                        <p><span className="font-semibold text-gray-700">Entrega:</span> {formatearFechaSafe(renta.fechaEntrega, opciones)}</p>
+                        <p><span className="font-semibold text-gray-700">Devolución:</span> {formatearFechaSafe(renta.fechaDevolucion, opciones)}</p>
+                        <p><span className="font-semibold text-gray-700">Estado:</span> {renta.estado}</p>
+                     </div>
 
-         <style>{`
-               .rentas-container {
-                  max-width: 1150px; 
-                  margin: 20px auto;
-                  padding: 0 20px;
-               }
-               
-               .filtros-container-bar {
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 20px;
-                  align-items: flex-end;
-                  background-color: #fcfcfc;
-                  padding: 20px;
-                  border-radius: 16px;
-                  margin-bottom: 20px;
-                  box-shadow: 4px 4px 12px rgba(0,0,0,0.03);
-               }
+                     <div className="mt-3 flex items-center gap-2">
+                        <select
+                           className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm outline-none"
+                           value={renta.estado}
+                           onChange={(e) => handleEstadoChange(renta.id, e.target.value)}
+                        >
+                           <option value="cita de ajustes">Cita de Ajustes</option>
+                           <option value="ajustes">Ajustes</option>
+                           <option value="planchado">Planchado</option>
+                           <option value="entregado">Entregado</option>
+                           <option value="devolucion">Devolucion</option>
+                           <option value="tintoreria">Tintorería</option>
+                           <option value="en tienda">En tienda</option>
+                        </select>
+                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-gray-600 shadow-sm" onClick={() => navigate(`/admin/renta/${renta.id}`)}>
+                           <MdEdit />
+                        </button>
+                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-gray-600 shadow-sm" onClick={() => handleDelete(renta.id)}>
+                           <MdDelete />
+                        </button>
+                     </div>
 
-               .filtro-grupo {
-                  display: flex;
-                  flex-direction: column;
-                  gap: 8px;
-               }
+                     <button className="mt-3 text-sm font-semibold text-pink-600" onClick={() => setResumenAbierto(abierto ? null : renta.id)}>
+                        {abierto ? 'Ocultar resumen' : 'Ver resumen'}
+                     </button>
 
-               .filtro-grupo label {
-                  margin: 0;
-                  font-size: 0.85rem;
-                  font-weight: 600;
-                  color: #6b7280;
-               }
-
-               .filtro-grupo-fechas {
-                  display: flex;
-                  gap: 15px;
-               }
-
-               .input-fecha {
-                  font-family: inherit;
-                  padding: 6px 12px;
-               }
-
-               .rentas-table {
-                  width: 100%;
-                  border-collapse: separate; 
-                  border-spacing: 0;         
-                  background-color: #fcfcfc; 
-                  border-radius: 16px;
-                  overflow: visible;         
-                  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-               }
-
-               .rentas-table th,
-               .rentas-table td {
-                  padding: 16px;
-                  text-align: left;
-                  border-bottom: 1px solid #e5e7eb;
-                  vertical-align: middle;
-                  font-size: 0.9rem;
-               }
-
-               .rentas-table th:first-child {
-                  border-top-left-radius: 16px;
-               }
-               .rentas-table th:last-child {
-                  border-top-right-radius: 16px;
-               }
-
-               .rentas-table tr:last-child td {
-                  border-bottom: none;
-               }
-               
-               .rentas-table tr:last-child td:first-child {
-                  border-bottom-left-radius: 16px;
-               }
-               .rentas-table tr:last-child td:last-child {
-                  border-bottom-right-radius: 16px;
-               }
-
-               .rentas-table th {
-                  background-color: #eeecec; 
-                  font-weight: 600;
-                  color: #374151;
-               }
-
-               .id-cell-tooltip {
-                  position: relative; 
-                  cursor: pointer;       
-               }
-
-               .id-number {
-                  font-weight: bold;
-                  color: #db2777; 
-                  font-size: 1.05rem;
-               }
-
-               .tooltip-box {
-                  display: none;
-                  position: absolute;
-                  top: 100%; 
-                  left: 15px;
-                  background-color: #ffffff;
-                  color: #374151;
-                  padding: 16px;
-                  border-radius: 14px;
-                  width: 730px; 
-                  z-index: 999;
-                  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15), 
-                              0 4px 10px rgba(0, 0, 0, 0.04);
-                  border: 1px solid #e5e7eb;
-                  text-align: left;
-               }
-
-               .tooltip-box::before {
-                  content: "";
-                  position: absolute;
-                  bottom: 100%; 
-                  left: 20px;
-                  border-width: 8px;
-                  border-style: solid;
-                  border-color: transparent transparent #ffffff transparent;
-               }
-
-               .tooltip-box.up {
-                  top: auto;
-                  bottom: 100%; 
-                  margin-bottom: 12px;
-                  box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.15), 
-                              0 -4px 10px rgba(0, 0, 0, 0.04);
-               }
-
-               .tooltip-box.up::before {
-                  bottom: auto;
-                  top: 100%; 
-                  border-color: #ffffff transparent transparent transparent;
-               }
-
-               .id-cell-tooltip:hover .tooltip-box {
-                  display: block;
-               }
-
-               .tooltip-box h4 {
-                  margin: 0 0 12px 0;
-                  color: #db2777; 
-                  font-size: 1.05rem;
-                  border-bottom: 2px solid #fce7f3;
-                  padding-bottom: 6px;
-               }
-
-               .tooltip-content-grid {
-                  display: grid;
-                  grid-template-columns: repeat(4, 1fr); 
-                  gap: 16px;
-               }
-
-               .tooltip-seccion-titulo {
-                  margin: 0 0 8px 0;
-                  font-size: 0.8rem;
-                  font-weight: bold;
-                  color: #4b5563;
-                  text-transform: uppercase;
-                  letter-spacing: 0.6px;
-               }
-
-               .tooltip-fecha-ajuste-top {
-                  margin: 0 0 8px 0;
-                  font-size: 0.82rem;
-                  color: #1f2937;
-                  background-color: #fff1f2;
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                  display: inline-block;
-               }
-
-               .tooltip-vestido-nombre {
-                  margin: 0 0 12px 0;
-                  font-size: 0.9rem;
-                  font-weight: 600;
-                  color: #db2777;
-                  background: #fdf2f8;
-                  padding: 6px 10px;
-                  border-radius: 6px;
-               }
-
-               .tooltip-grid {
-                  display: grid;
-                  grid-template-columns: repeat(2, 1fr); 
-                  gap: 6px;
-                  font-size: 0.8rem;
-                  background-color: #f9fafb;
-                  padding: 10px;
-                  border-radius: 8px;
-               }
-
-               .tooltip-grid p { margin: 0; }
-
-               .tooltip-finanzas-box {
-                  background-color: #f0fdf4;
-                  padding: 10px;
-                  border-radius: 8px;
-                  font-size: 0.82rem;
-                  margin-bottom: 12px;
-                  border: 1px solid #dcfce7;
-               }
-               .tooltip-finanzas-box p { margin: 0; }
-               .tooltip-finanzas-desglose {
-                  font-size: 0.72rem;
-                  color: #166534;
-                  display: block;
-                  margin-bottom: 6px;
-               }
-               .tooltip-restante-row {
-                  border-top: 1px dashed #bbf7d0;
-                  padding-top: 6px;
-                  margin-top: 4px;
-                  display: flex;
-                  justify-content: space-between;
-               }
-               .restante-monto {
-                  color: #b91c1c;
-                  font-weight: bold;
-               }
-
-               .tooltip-grid-mini {
-                  display: grid;
-                  grid-template-columns: 1fr 1fr;
-                  gap: 6px;
-                  font-size: 0.8rem;
-                  background-color: #f9fafb;
-                  padding: 8px 10px;
-                  border-radius: 6px;
-               }
-               .tooltip-grid-mini p { margin: 0; }
-
-               .no-ajustes-text {
-                  margin: 0;
-                  font-size: 0.8rem;
-                  color: #9ca3af;
-                  background-color: #f9fafb;
-                  padding: 10px;
-                  border-radius: 8px;
-               }
-
-               .tooltip-notas-container-inline {
-                  display: flex;
-                  flex-direction: column;
-               }
-
-               .notas-texto {
-                  margin: 0;
-                  font-size: 0.8rem;
-                  background-color: #fffbeb; 
-                  color: #78350f;
-                  padding: 10px;
-                  border-radius: 6px;
-                  border-left: 3px solid #f59e0b;
-                  max-height: 110px; 
-                  overflow-y: auto;  
-               }
-
-               .icono-liquidado-neumorphic {
-                  width: 28px;
-                  height: 28px;
-                  border-radius: 50%;
-                  font-size: 0.85rem;
-                  display: inline-flex;
-                  align-items: center;
-                  justify-content: center;
-                  font-weight: bold;
-                  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.15), 1px 1px 2px rgba(255,255,255,0.8);
-               }
-               .icono-liquidado-neumorphic.pagado {
-                  background-color: #e6f9ed;
-                  color: #166534;
-               }
-               .icono-liquidado-neumorphic.pendiente {
-                  background-color: #fee2e2;
-                  color: #991b1b;
-               }
-               
-               .select-estado-neumorphic {
-                  -webkit-appearance: none;  
-                  -moz-appearance: none;
-                  appearance: none;          
-
-                  border: none;
-                  outline: none;
-                  
-                  padding: 8px 32px 8px 12px; 
-                  border-radius: 8px;
-                  background: #ffffff;
-                  color: #4b5563;
-                  font-weight: 500;
-                  cursor: pointer;
-                  
-                  box-shadow: inset 2px 2px 5px #bebebe, 
-                              inset -2px -2px 5px #ffffff;
-                  transition: all 0.3s ease;
-
-                  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-                  background-repeat: no-repeat;
-                  background-position: right 12px center;
-                  background-size: 14px;
-               }
-
-               .select-estado-neumorphic:focus {
-                  box-shadow: inset 1px 1px 3px #bebebe, 
-                              inset -1px -1px 3px #ffffff,
-                              0 0 4px rgba(59, 130, 246, 0.5); 
-               }
-               
-               .btn-neumorphic {
-                  border: none;
-                  outline: none;
-                  cursor: pointer;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  width: 40px;
-                  height: 40px;
-                  border-radius: 50%;
-                  color: #666;
-                  font-size: 1.2rem;
-                  background: linear-gradient(145deg, #ffffff, #e2e2e2);
-                  box-shadow: 2px 2px 8px #acacac, 
-                              -2px -2px 8px #f1f1f1;
-                  transition: all 0.2s ease;
-               }
-
-               .btn-neumorphic:active {
-                  background: #ffffff;
-                  box-shadow: inset 2px 2px 5px #d1d1d1, 
-                              inset -2px -2px 5px #ffffff;
-                  color: #333;
-               }
-               .acciones-container{
-                  display: flex;
-                  flex-direction: row;
-                  gap: 10px;
-                  align-items: center;
-               }
-         `}</style>
+                     {abierto ? (
+                        <div className="mt-3 space-y-2 rounded-xl bg-gray-50 p-3 text-sm text-gray-700">
+                           <p><strong>Cliente:</strong> {renta.name}</p>
+                           <p><strong>Teléfono:</strong> {renta.telefono}</p>
+                           <p><strong>Precio renta:</strong> ${precioDeRenta}</p>
+                           <p><strong>Anticipo:</strong> ${totalAnticipos}</p>
+                           <p><strong>Falta por pagar:</strong> ${faltaPorPagarCalculado}</p>
+                           {tieneAjuste ? <p><strong>Ajuste:</strong> Sí</p> : <p><strong>Ajuste:</strong> No</p>}
+                           {tieneNotas ? <p><strong>Notas:</strong> {renta.notes || renta.notas}</p> : null}
+                        </div>
+                     ) : null}
+                  </div>
+               );
+            })}
+         </div>
       </div>
    );
 }

@@ -182,7 +182,7 @@ export async function CrearReciboPDF(datosVenta) {
                   Fecha de ajustes: ${fechaAjustesTexto}
                </div>
                
-               <div style="font-size:12px; text-align:center; margin-top:30px; font-style:italic;">
+               <div style="font-size:13px; text-align:center; margin-top:30px; font-style:italic;">
                   En caso de cancelación por parte del cliente, <strong>el anticipo del 50% del costo total de la renta no será
                   reembolsable</strong>. El vestido deberá ser <strong>devuelto en la fecha acordada</strong>. En <strong>caso de retraso</strong>
                   , se aplicará <strong>una multa de $150.00 por cada día de atraso</strong>. Cualquier daño, mancha irreparable o pérdida en la prenda
