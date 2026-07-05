@@ -530,8 +530,8 @@ const NewClient = () => {
                         <p><span className="font-semibold text-gray-700">Municipio:</span> {cliente.municipio || 'N/A'}</p>
                      </div>
                      <div className="flex gap-2 border-t border-gray-100 pt-3">
-                        <button onClick={() => handleClientEdit(cliente)} className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition text-sm">Editar</button>
-                        <button onClick={() => handleClientDelete(cliente.id)} className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition text-sm">Eliminar</button>
+                        <button type="button" onClick={(e) => { e.preventDefault(); handleClientEdit(cliente); }} className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition text-sm">Editar</button>
+                        <button type="button" onClick={(e) => { e.preventDefault(); handleClientDelete(cliente.id); }} className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition text-sm">Eliminar</button>
                      </div>
                   </div>
                ))}
