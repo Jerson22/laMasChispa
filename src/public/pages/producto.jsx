@@ -55,7 +55,18 @@ const Producto = () => {
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
             const proximas = data
-               .map((ventas) => ({ ...ventas, fechaEntrega: new Date(ventas.fechaEntrega) }))
+               .map((ventas) => {
+                  const fechaString = ventas.fechaEntrega;
+                  let fecha = new Date(fechaString);
+                  if (typeof fechaString === 'string' && fechaString.length >= 10) {
+                     const fechaLimpia = fechaString.slice(0, 10);
+                     if (fechaLimpia.includes('-')) {
+                        const [year, month, day] = fechaLimpia.split('-').map(Number);
+                        fecha = new Date(year, month - 1, day);
+                     }
+                  }
+                  return { ...ventas, fechaEntrega: fecha };
+               })
                .filter((ventas) => ventas.fechaEntrega >= hoy)
                .sort((a, b) => a.fechaEntrega - b.fechaEntrega);
             setVentas(proximas);
