@@ -32,7 +32,7 @@ const Producto = () => {
    }, [id]);
 
    const formatFechaEvento = (fecha) => {
-      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
       return fecha.toLocaleDateString('es-ES', options).replace(/ de /g, ' ');
    };
 
@@ -56,16 +56,22 @@ const Producto = () => {
             hoy.setHours(0, 0, 0, 0);
             const proximas = data
                .map((ventas) => {
-                  const fechaString = ventas.fechaEntrega;
-                  let fecha = new Date(fechaString);
-                  if (typeof fechaString === 'string' && fechaString.length >= 10) {
-                     const fechaLimpia = fechaString.slice(0, 10);
-                     if (fechaLimpia.includes('-')) {
-                        const [year, month, day] = fechaLimpia.split('-').map(Number);
-                        fecha = new Date(year, month - 1, day);
+                  const parseFecha = (fechaString) => {
+                     let fecha = new Date(fechaString);
+                     if (typeof fechaString === 'string' && fechaString.length >= 10) {
+                        const fechaLimpia = fechaString.slice(0, 10);
+                        if (fechaLimpia.includes('-')) {
+                           const [year, month, day] = fechaLimpia.split('-').map(Number);
+                           fecha = new Date(year, month - 1, day);
+                        }
                      }
-                  }
-                  return { ...ventas, fechaEntrega: fecha };
+                     return fecha;
+                  };
+                  return {
+                     ...ventas,
+                     fechaEntrega: parseFecha(ventas.fechaEntrega),
+                     fechaDevolucion: parseFecha(ventas.fechaDevolucion)
+                  };
                })
                .filter((ventas) => ventas.fechaEntrega >= hoy)
                .sort((a, b) => a.fechaEntrega - b.fechaEntrega);
@@ -148,7 +154,7 @@ const Producto = () => {
                         </div>
                      )}
                   </div>
-                  
+
                ) : null}
 
                <div className="producto-detail-description">
@@ -173,7 +179,7 @@ const Producto = () => {
 
                {localStorage.getItem('token') ? (
                   <div className="producto-detail-reservas">
-                     <h3>Fechas de entrega próximas</h3>
+                     <h3>Fechas de Rentas Próximas</h3>
                      {loadingVentas ? (
                         <p>Cargando fechas...</p>
                      ) : errorVentas ? (
@@ -184,8 +190,10 @@ const Producto = () => {
                         <ul>
                            {ventas.map((venta) => (
                               <li key={venta.id}>
-                                 <strong>{venta.fechaEntrega.toLocaleDateString('es-ES',{weekday: 'long'})} </strong>
-                                 <strong>{formatFechaEvento(venta.fechaEntrega)}</strong> — {venta.name}
+                                 <strong>{formatFechaEvento(venta.fechaEntrega)}</strong>
+                                 {venta.fechaDevolucion && venta.fechaDevolucion.toString() !== 'Invalid Date' ? (
+                                    <> al <strong>{formatFechaEvento(venta.fechaDevolucion)}</strong></>
+                                 ) : null} — {venta.name}
                               </li>
                            ))}
                         </ul>
