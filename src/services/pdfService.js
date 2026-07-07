@@ -24,7 +24,7 @@ export async function CrearReciboPDF(datosVenta) {
    // 1. Buscamos la ruta real de tu imagen en el disco duro
    const rutaImagen = path.join(__dirname, '../public/images/logo.png');
    const rutaImagenRedes = path.join(__dirname, './redes.png');
-   
+
    // 2. Leemos el archivo y lo convertimos a formato Base64
    const logoBase64 = fs.readFileSync(rutaImagen).toString('base64');
    const logoRedesBase64 = fs.readFileSync(rutaImagenRedes).toString('base64');
@@ -47,8 +47,8 @@ export async function CrearReciboPDF(datosVenta) {
 
    const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox']
-   });   
-   const page = await browser.newPage();   
+   });
+   const page = await browser.newPage();
    const htmlContenido = `
       <html>
          <head>
@@ -172,17 +172,17 @@ export async function CrearReciboPDF(datosVenta) {
                   Horario para recoger tu vestido: 1 p.m. a 8 p.m.
                </div>
                
-               <div style="margin-top:20px; background-color: #fbdbeb; text-align: left; font-size: 25px; padding: 20px 40px">
+               <div style="margin-top:15px; background-color: #fbdbeb; text-align: left; font-size: 20px; padding: 20px 40px">
                   Fecha de entrega: ${fechaEntregaTexto}
                </div>
-               <div style="margin-top:20px; background-color: #fbdbeb; text-align: left; font-size: 25px; padding: 20px 40px">
+               <div style="margin-top:20px; background-color: #fbdbeb; text-align: left; font-size: 20px; padding: 20px 40px">
                   Fecha de devolución: ${fechaDevolucionTexto}
                </div>
-               <div style="margin-top:20px; background-color: #fbdbeb; text-align: left; font-size: 25px; padding: 20px 40px">
+               <div style="margin-top:20px; background-color: #fbdbeb; text-align: left; font-size: 20px; padding: 20px 40px">
                   Fecha de ajustes: ${fechaAjustesTexto}
                </div>
                
-               <div style="font-size:13px; text-align:center; margin-top:30px; font-style:italic;">
+               <div style="font-size:12px; text-align:center; margin-top:30px; font-style:italic;">
                   En caso de cancelación por parte del cliente, <strong>el anticipo del 50% del costo total de la renta no será
                   reembolsable</strong>. El vestido deberá ser <strong>devuelto en la fecha acordada</strong>. En <strong>caso de retraso</strong>
                   , se aplicará <strong>una multa de $150.00 por cada día de atraso</strong>. Cualquier daño, mancha irreparable o pérdida en la prenda

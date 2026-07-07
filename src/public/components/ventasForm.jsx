@@ -35,7 +35,7 @@ export default function VentasForm() {
    const [error, setError] = useState(null);
    const [searchTerm, setSearchTerm] = useState('');
    const [editandoFlag, setEditandoFlag] = useState(false);
-   
+
    // NUEVOS ESTADOS PARA EL BUSCADOR DE PRODUCTOS CON IMAGEN
    const [productSearch, setProductSearch] = useState('');
    const [showDropdown, setShowDropdown] = useState(false);
@@ -51,11 +51,11 @@ export default function VentasForm() {
    useEffect(() => {
       const fetchVenta = async () => {
          // solo buscamos si hay ID (modo edición)
-         if(!id) return;
+         if (!id) return;
 
-         try{
+         try {
             const response = await fetch(`/api/renta/${id}`, {
-               headers: {'auth-token': token}
+               headers: { 'auth-token': token }
             });
             if (!response.ok) {
                throw new Error('No se pudo cargar la venta');
@@ -64,15 +64,15 @@ export default function VentasForm() {
             // console.log('Respuesta de Venta: ', data);
             // rellenar el formulario si hay datos
             setVentasForm({
-               name:data.name || '',
+               name: data.name || '',
                productId: data.productId || '',
                bolso: data.bolso === "1",
                aretes: data.aretes === "1",
                ajuste: data.ajuste === "1",
                fechaAjuste: data.fechaAjuste ? data.fechaAjuste.split('T')[0] : '',
                fechaRenta: data.fechaRenta ? data.fechaRenta.split('T')[0] : '',
-               fechaEntrega: data. fechaEntrega ? data.fechaEntrega.split('T')[0] : '',
-               fechaDevolucion: data. fechaDevolucion ? data.fechaDevolucion.split('T')[0] : '',
+               fechaEntrega: data.fechaEntrega ? data.fechaEntrega.split('T')[0] : '',
+               fechaDevolucion: data.fechaDevolucion ? data.fechaDevolucion.split('T')[0] : '',
                anticipoEfectivo: data.anticipoEfectivo || '',
                anticipoTarjeta: data.anticipoTarjeta || '',
                pendienteEfectivo: data.pendienteEfectivo || '',
@@ -88,7 +88,7 @@ export default function VentasForm() {
                espalda: data.espalda || '',
             });
             setEditandoFlag(true);
-         }catch(err){
+         } catch (err) {
             console.error('Error fetching ventas:', err);
             setError('Error al cargar ventas');
          }
@@ -113,14 +113,14 @@ export default function VentasForm() {
    const fetchProductos = async () => {
       try {
          const response = await fetch('/api/productos');
-         
+
          if (!response.ok) {
             console.error('Error fetching productos:', response.status);
             setProductos([]);
             setLoading(false);
             return;
          }
-         
+
          const data = await response.json();
          setProductos(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -138,7 +138,7 @@ export default function VentasForm() {
          const response = await fetch('/api/clientes', {
             headers: { 'auth-token': token }
          });
-         
+
          if (response.ok) {
             const data = await response.json();
             setClientes(Array.isArray(data) ? data : []);
@@ -176,9 +176,9 @@ export default function VentasForm() {
          }
       } else {
          // LÓGICA ORIGINAL: Para cualquier otro input (texto, números u otros checkboxes)
-         setVentasForm((prev) => ({ 
-            ...prev, 
-            [name]: type === 'checkbox' ? checked : value 
+         setVentasForm((prev) => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
          }));
       }
    };
@@ -207,7 +207,7 @@ export default function VentasForm() {
    // Para envio de Formulario
    const handleVentaSubmit = async (e) => {
       e.preventDefault();
-      
+
       // 1. Determinar si estamos editando o creando
       const isEditing = !!id; // Esto es true si existe id, false si es undefined
       const url = isEditing ? `/api/ventas/${id}` : '/api/ventas';
@@ -251,10 +251,10 @@ export default function VentasForm() {
          if (!response.ok) throw new Error('Error al guardar la venta');
 
          alert(isEditing ? 'Venta actualizada correctamente' : 'Venta registrada correctamente');
-         
+
          // Si fue una creación, limpiamos el form
          if (!isEditing) {
-            setVentasForm({ 
+            setVentasForm({
                name: '',
                productId: '',
                bolso: false,
@@ -282,7 +282,7 @@ export default function VentasForm() {
             setSelectedProduct(null);
          } else {
             // Si fue edición, podrías redirigir al listado o simplemente dejar el form tal cual
-            navigate('/admin/rentas'); 
+            navigate('/admin/rentas');
          }
 
       } catch (err) {
@@ -314,14 +314,14 @@ export default function VentasForm() {
       try {
          const response = await fetch('/api/reciboPdf', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json','auth-token': token },
+            headers: { 'Content-Type': 'application/json', 'auth-token': token },
             body: JSON.stringify(ventasForm)
          });
 
          if (!response.ok) throw new Error("Error en el servidor");
 
          // ⚠️ CRÍTICO: Esto transforma la respuesta del servidor en un archivo descargable
-         const blob = await response.blob(); 
+         const blob = await response.blob();
 
          // Crear el enlace invisible en el navegador para forzar la descarga
          const urlDescarga = window.URL.createObjectURL(blob);
@@ -368,7 +368,7 @@ export default function VentasForm() {
                               required
                               className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                            />
-                           
+
                            {showClientDropdown && ventasForm.name.length > 0 && (
                               <div className="absolute inset-x-0 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl">
                                  {sugerenciasClientes.length > 0 ? (
@@ -549,76 +549,76 @@ export default function VentasForm() {
 
                   {ventasForm.ajuste && (
                      <div className="grid gap-4 rounded-[28px] border border-gray-200 bg-gray-50 p-6 md:grid-cols-3 order-2 lg:order-none lg:col-span-2">
-                     <div className="space-y-3">
-                        <div>
-                           <label className="block text-sm font-semibold text-gray-600">Bastilla</label>
-                           <input
-                              type="text"
-                              name="bastilla"
-                              value={ventasForm.bastilla}
-                              onChange={handleVentasChange}
-                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           />
+                        <div className="space-y-3">
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Bastilla</label>
+                              <input
+                                 type="text"
+                                 name="bastilla"
+                                 value={ventasForm.bastilla}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Busto</label>
+                              <input
+                                 type="text"
+                                 name="busto"
+                                 value={ventasForm.busto}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
                         </div>
-                        <div>
-                           <label className="block text-sm font-semibold text-gray-600">Busto</label>
-                           <input
-                              type="text"
-                              name="busto"
-                              value={ventasForm.busto}
-                              onChange={handleVentasChange}
-                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           />
-                        </div>
-                     </div>
 
-                     <div className="space-y-3">
-                        <div>
-                           <label className="block text-sm font-semibold text-gray-600">Tirantes</label>
-                           <input
-                              type="text"
-                              name="tirantes"
-                              value={ventasForm.tirantes}
-                              onChange={handleVentasChange}
-                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           />
+                        <div className="space-y-3">
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Tirantes</label>
+                              <input
+                                 type="text"
+                                 name="tirantes"
+                                 value={ventasForm.tirantes}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Manga/Puño</label>
+                              <input
+                                 type="text"
+                                 name="mangaPuno"
+                                 value={ventasForm.mangaPuno}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
                         </div>
-                        <div>
-                           <label className="block text-sm font-semibold text-gray-600">Manga/Puño</label>
-                           <input
-                              type="text"
-                              name="mangaPuno"
-                              value={ventasForm.mangaPuno}
-                              onChange={handleVentasChange}
-                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           />
-                        </div>
-                     </div>
 
-                     <div className="space-y-3">
-                        <div>
-                           <label className="block text-sm font-semibold text-gray-600">Cintura</label>
-                           <input
-                              type="text"
-                              name="cintura"
-                              value={ventasForm.cintura}
-                              onChange={handleVentasChange}
-                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           />
-                        </div>
-                        <div>
-                           <label className="block text-sm font-semibold text-gray-600">Espalda</label>
-                           <input
-                              type="text"
-                              name="espalda"
-                              value={ventasForm.espalda}
-                              onChange={handleVentasChange}
-                              className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           />
+                        <div className="space-y-3">
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Cintura</label>
+                              <input
+                                 type="text"
+                                 name="cintura"
+                                 value={ventasForm.cintura}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Espalda</label>
+                              <input
+                                 type="text"
+                                 name="espalda"
+                                 value={ventasForm.espalda}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
                         </div>
                      </div>
-                  </div>
-               )}
+                  )}
                </div>
 
                <div className="space-y-4  border-t border-gray-200 pt-6">
@@ -661,7 +661,7 @@ export default function VentasForm() {
                      </div>
 
                      <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
-                        <h3 className="mb-4 text-base font-semibold text-gray-900">{selectedProduct ? `Pendiente $${Number(selectedProduct.precio_renta) - Number(ventasForm.anticipoEfectivo || 0) - Number(ventasForm.anticipoTarjeta || 0)}` : 'Pendiente'}</h3>
+                        <h3 className="mb-4 text-base font-semibold text-gray-900">{selectedProduct ? `Pendiente $${Number(selectedProduct.precio_renta) - Number(ventasForm.anticipoEfectivo || 0) - Number(ventasForm.anticipoTarjeta || 0) - Number(ventasForm.pendienteEfectivo || 0) - Number(ventasForm.pendienteTarjeta || 0)}` : 'Pendiente'}</h3>
                         <div className="space-y-4">
                            <div>
                               <label className="block text-sm font-semibold text-gray-600">Efectivo</label>

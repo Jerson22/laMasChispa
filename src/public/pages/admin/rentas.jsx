@@ -6,16 +6,16 @@ import { useNavigate } from 'react-router-dom';
 // 💡 FUNCIÓN ASISTENTE CORREGIDA: Extrae estrictamente la fecha textual (YYYY-MM-DD) e ignora la zona horaria
 const formatearFechaSafe = (fechaString, opciones) => {
    if (!fechaString) return 'N/A';
-   
+
    // Tomamos solo los primeros 10 caracteres (YYYY-MM-DD), ignorando 'T', horas o 'Z'
    const fechaLimpia = fechaString.slice(0, 10);
-   
+
    if (fechaLimpia.includes('-') && fechaLimpia.length === 10) {
       const [year, month, day] = fechaLimpia.split('-').map(Number);
       // Creamos la fecha en modo local estricto (año, mes base 0, día)
       return new Date(year, month - 1, day).toLocaleDateString('es-ES', opciones);
    }
-   
+
    return new Date(fechaString).toLocaleDateString('es-ES', opciones);
 };
 
@@ -25,10 +25,10 @@ export default function Rentas() {
    const navigate = useNavigate();
 
    const [filtros, setFiltros] = useState({
-      tipoFecha: 'todas',        
-      preset: 'todos',          
-      fechaInicio: '',          
-      fechaFin: ''              
+      tipoFecha: 'todas',
+      preset: 'todos',
+      fechaInicio: '',
+      fechaFin: ''
    });
    const [searchQuery, setSearchQuery] = useState('');
    const [showFiltersMobile, setShowFiltersMobile] = useState(false);
@@ -36,7 +36,7 @@ export default function Rentas() {
    useEffect(() => {
       const token = localStorage.getItem('token');
       if (!token) return;
-      
+
       const fetchData = async () => {
          try {
             const responseRentas = await fetch('/api/rentas2', {
@@ -44,7 +44,7 @@ export default function Rentas() {
             });
             const dataRentas = await responseRentas.json();
             setRentas(dataRentas);
-            
+
          } catch (error) {
             console.error('Error fetching data:', error);
          }
@@ -61,7 +61,7 @@ export default function Rentas() {
    };
 
    const obtenerRentasFiltradas = () => {
-      if (!Array.isArray(rentas)) return []; 
+      if (!Array.isArray(rentas)) return [];
 
       const filtradas = rentas.filter((renta) => {
          if (searchQuery.trim() !== '') {
@@ -72,10 +72,10 @@ export default function Rentas() {
          }
 
          if (filtros.tipoFecha !== 'todas' && !renta[filtros.tipoFecha]) {
-            return false; 
+            return false;
          }
 
-         if (filtros.preset === 'todos') return true; 
+         if (filtros.preset === 'todos') return true;
 
          const verificarFechaIndividual = (fechaString) => {
             if (!fechaString) return false;
@@ -90,7 +90,7 @@ export default function Rentas() {
 
             // Filtro: Hoy
             if (filtros.preset === 'hoy') {
-               return stringRenta === stringHoy; 
+               return stringRenta === stringHoy;
             }
 
             // Para rangos estables creamos objetos Date locales a mediodía
@@ -101,11 +101,11 @@ export default function Rentas() {
             if (filtros.preset === 'semana') {
                const tempHoy = new Date();
                tempHoy.setHours(0, 0, 0, 0);
-               
+
                const diaSemana = tempHoy.getDay();
-               const diferenciaLunes = tempHoy.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1); 
+               const diferenciaLunes = tempHoy.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
                const lunes = new Date(tempHoy.getFullYear(), tempHoy.getMonth(), diferenciaLunes, 0, 0, 0);
-               
+
                const domingo = new Date(lunes);
                domingo.setDate(lunes.getDate() + 6);
                domingo.setHours(23, 59, 59, 999);
@@ -152,16 +152,16 @@ export default function Rentas() {
 
       try {
          const response = await fetch(`/api/rentas/${rentaId}`, {
-            method: 'PUT', 
-            headers: { 
+            method: 'PUT',
+            headers: {
                'Content-Type': 'application/json',
-               'auth-token': token 
+               'auth-token': token
             },
             body: JSON.stringify({ estado: nuevoEstado })
          });
          if (response.ok) {
-            setRentas(prevRentas => 
-               prevRentas.map(renta => 
+            setRentas(prevRentas =>
+               prevRentas.map(renta =>
                   renta.id === rentaId ? { ...renta, estado: nuevoEstado } : renta
                )
             );
@@ -194,10 +194,10 @@ export default function Rentas() {
    const clearFilters = () => {
       setSearchQuery('');
       setFiltros({
-         tipoFecha: 'todas',        
-         preset: 'todos',          
-         fechaInicio: '',          
-         fechaFin: ''              
+         tipoFecha: 'todas',
+         preset: 'todos',
+         fechaInicio: '',
+         fechaFin: ''
       });
    };
 
@@ -208,7 +208,7 @@ export default function Rentas() {
             <div className="flex flex-1 flex-col gap-2 w-full sm:w-auto">
                <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-gray-500">Buscar por cliente o vestido</label>
-                  <button 
+                  <button
                      className="text-xs font-semibold text-pink-600 sm:hidden"
                      onClick={() => setShowFiltersMobile(!showFiltersMobile)}
                   >
@@ -305,7 +305,7 @@ export default function Rentas() {
                   {Array.isArray(rentasFiltradas) && rentasFiltradas.map((renta, index) => {
                      const nombreVestido = renta.producto_nombre ? renta.producto_nombre : 'No especificado / Cargando...';
                      const precioDeRenta = renta.precio_renta ? Number(renta.precio_renta || 0) : 0;
-                     const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0);
+                     const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0) + Number(renta.pendienteEfectivo || 0) + Number(renta.pendienteTarjeta || 0);
                      const faltaPorPagarCalculado = precioDeRenta - totalAnticipos;
                      const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
                      const tieneAjuste = renta.ajuste === true || renta.ajuste === 1 || renta.ajuste === '1' || renta.ajuste === 'true';
@@ -428,7 +428,7 @@ export default function Rentas() {
                                  <option value="ajustes">Ajustes</option>
                                  <option value="planchado">Planchado</option>
                                  <option value="entregado">Entregado</option>
-                                 <option value="devolucion">Devolucion</option>
+                                 <option value="devuelto">Devuelto</option>
                                  <option value="tintoreria">Tintorería</option>
                                  <option value="en tienda">En tienda</option>
                               </select>
@@ -455,7 +455,7 @@ export default function Rentas() {
             {Array.isArray(rentasFiltradas) && rentasFiltradas.map((renta) => {
                const nombreVestido = renta.producto_nombre ? renta.producto_nombre : 'No especificado / Cargando...';
                const precioDeRenta = renta.precio_renta ? Number(renta.precio_renta || 0) : 0;
-               const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0);
+               const totalAnticipos = Number(renta.anticipoEfectivo || 0) + Number(renta.anticipoTarjeta || 0) + Number(renta.pendienteEfectivo || 0) + Number(renta.pendienteTarjeta || 0);
                const faltaPorPagarCalculado = precioDeRenta - totalAnticipos;
                const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
                const tieneAjuste = renta.ajuste === true || renta.ajuste === 1 || renta.ajuste === '1' || renta.ajuste === 'true';
@@ -491,7 +491,7 @@ export default function Rentas() {
                            <option value="ajustes">Ajustes</option>
                            <option value="planchado">Planchado</option>
                            <option value="entregado">Entregado</option>
-                           <option value="devolucion">Devolucion</option>
+                           <option value="devuelto">Devuelto</option>
                            <option value="tintoreria">Tintorería</option>
                            <option value="en tienda">En tienda</option>
                         </select>
