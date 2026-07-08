@@ -260,10 +260,47 @@ app.delete('/api/clientes/:id', verificarToken, esAdmin, async (req, res) => {
    }
 });
 
+// Endpoint para validar disponibilidad de un vestido
+app.post('/api/validar-disponibilidad', verificarToken, esAdmin, async (req, res) => {
+   const { productId, fechaEntrega, fechaDevolucion, excludeId } = req.body;
+
+   if (!productId || !fechaEntrega || !fechaDevolucion) {
+      return res.status(400).json({ error: 'Faltan datos para validar.' });
+   }
+
+   try {
+      // Un rango (A, B) choca con (C, D) si A <= D y B >= C
+      let query = `
+         SELECT id, "fechaEntrega", "fechaDevolucion", "name"
+         FROM ventas
+         WHERE "productId" = $1
+           AND "fechaEntrega" <= $2
+           AND "fechaDevolucion" >= $3
+      `;
+      const params = [productId, fechaDevolucion, fechaEntrega];
+
+      if (excludeId) {
+         query += ` AND id != $4`;
+         params.push(excludeId);
+      }
+
+      const result = await db.query(query, params);
+
+      if (result.rows.length > 0) {
+         return res.json({ disponible: false, conflicto: result.rows[0] });
+      }
+
+      res.json({ disponible: true });
+   } catch (error) {
+      console.error('Error al validar disponibilidad:', error);
+      res.status(500).json({ error: 'Error al validar la disponibilidad del vestido.' });
+   }
+});
+
 // insertar ventas
 app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
    console.log("Datos recibidos para venta:", req.body);
-   const { name, productId, bolso, aretes, ajuste, fechaAjustes, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda} = req.body;
+   const { name, productId, bolso, aretes, ajuste, fechaAjustes, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda } = req.body;
    if (!name || !fechaRenta || !fechaEntrega || !fechaDevolucion || anticipoEfectivo === undefined && anticipoTarjeta === undefined) {
       return res.status(400).json({ error: 'Datos incompletos para crear la venta' });
    }
@@ -271,8 +308,8 @@ app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
       const isTrue = (val) => val === true || val === 1 || val === '1';
       const estado = isTrue(ajuste) ? 'cita de ajustes' : 'planchado';
       const ventasResult = await db.query(
-         'INSERT INTO ventas ( "name", "productId", "bolso", "aretes", "ajuste", "fechaAjuste", "estado", "fechaRenta", "fechaEntrega", "fechaDevolucion", "anticipoEfectivo", "anticipoTarjeta", "pendienteEfectivo", "pendienteTarjeta", "liquidado", "notas", "telefono", "bastilla", "busto", "tirantes", "mangaPuno", "cintura", "espalda") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23) RETURNING *',
-         [ name, productId || null, isTrue(bolso) ? '1' : '0', isTrue(aretes) ? '1' : '0', isTrue(ajuste) ? '1' : '0', fechaAjustes || null, estado, fechaRenta || null, fechaEntrega || null, fechaDevolucion || null, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, isTrue(liquidado) ? '1' : '0', notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda]
+         'INSERT INTO ventas ( "name", "productId", "bolso", "aretes", "ajuste", "fechaAjuste", "estado", "fechaRenta", "fechaEntrega", "fechaDevolucion", "anticipoEfectivo", "anticipoTarjeta", "pendienteEfectivo", "pendienteTarjeta", "extraEfectivo", "extraTarjeta", "liquidado", "notas", "telefono", "bastilla", "busto", "tirantes", "mangaPuno", "cintura", "espalda") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25) RETURNING *',
+         [name, productId || null, isTrue(bolso) ? '1' : '0', isTrue(aretes) ? '1' : '0', isTrue(ajuste) ? '1' : '0', fechaAjustes || null, estado, fechaRenta || null, fechaEntrega || null, fechaDevolucion || null, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, isTrue(liquidado) ? '1' : '0', notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda]
       );
       const reservaId = ventasResult.rows[0].id;
 
@@ -286,10 +323,10 @@ app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
 // Endpoint para actualizar formulario de ventas
 app.put('/api/ventas/:id', verificarToken, esAdmin, async (req, res) => {
    const { id } = req.params; // Obtenemos el ID de la URL
-   const { name, productId, bolso, aretes, ajuste, fechaAjuste, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda } = req.body;
+   const { name, productId, bolso, aretes, ajuste, fechaAjuste, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda } = req.body;
    console.log('Parametros recividos', req.body);
    try {
-      const isTrue = (val) => val === true || val === 1 || val === '1';      
+      const isTrue = (val) => val === true || val === 1 || val === '1';
       const result = await db.query(
          `UPDATE ventas SET 
             "name" = $1, 
@@ -305,38 +342,42 @@ app.put('/api/ventas/:id', verificarToken, esAdmin, async (req, res) => {
             "anticipoTarjeta" = $11, 
             "pendienteEfectivo" = $12, 
             "pendienteTarjeta" = $13, 
-            "liquidado" = $14, 
-            "notas" = $15, 
-            "telefono" = $16,
-            "bastilla" = $17,
-            "busto" = $18,
-            "tirantes" = $19,
-            "mangaPuno" = $20,
-            "cintura" = $21,
-            "espalda" = $22
-          WHERE id = $23 RETURNING *`,
-         [ 
-            name, 
-            productId || null, 
-            isTrue(bolso) ? '1' : '0', 
-            isTrue(aretes) ? '1' : '0', 
-            isTrue(ajuste) ? '1' : '0', 
-            fechaAjuste || null, 
-            fechaRenta || null, 
-            fechaEntrega || null, 
-            fechaDevolucion || null, 
-            anticipoEfectivo, 
-            anticipoTarjeta, 
-            pendienteEfectivo, 
-            pendienteTarjeta, 
-            isTrue(liquidado) ? '1' : '0', 
-            notas, 
+            "extraEfectivo" = $14,
+            "extraTarjeta" = $15,
+            "liquidado" = $16, 
+            "notas" = $17, 
+            "telefono" = $18,
+            "bastilla" = $19,
+            "busto" = $20,
+            "tirantes" = $21,
+            "mangaPuno" = $22,
+            "cintura" = $23,
+            "espalda" = $24
+          WHERE id = $25 RETURNING *`,
+         [
+            name,
+            productId || null,
+            isTrue(bolso) ? '1' : '0',
+            isTrue(aretes) ? '1' : '0',
+            isTrue(ajuste) ? '1' : '0',
+            fechaAjuste || null,
+            fechaRenta || null,
+            fechaEntrega || null,
+            fechaDevolucion || null,
+            anticipoEfectivo,
+            anticipoTarjeta,
+            pendienteEfectivo,
+            pendienteTarjeta,
+            extraEfectivo,
+            extraTarjeta,
+            isTrue(liquidado) ? '1' : '0',
+            notas,
             telefono,
-            bastilla, 
-            busto, 
-            tirantes, 
-            mangaPuno, 
-            cintura, 
+            bastilla,
+            busto,
+            tirantes,
+            mangaPuno,
+            cintura,
             espalda,
             id // El ID para la cláusula WHERE
          ]
@@ -364,8 +405,8 @@ app.get('/api/rentas', verificarToken, esAdmin, async (req, res) => {
    }
 });
 
-app.get('/api/rentas2', verificarToken, esAdmin, async (req, res)=>{
-   try{
+app.get('/api/rentas2', verificarToken, esAdmin, async (req, res) => {
+   try {
       const query = `select 
          v.*, 
          p.name as producto_nombre,
@@ -376,9 +417,9 @@ app.get('/api/rentas2', verificarToken, esAdmin, async (req, res)=>{
          order by v.id desc`;
       const result = await db.query(query);
       res.json(result.rows);
-   }catch(error){
+   } catch (error) {
       console.error(error);
-      res.status(500).json({error: 'Error al conseguir Rentas 2'})
+      res.status(500).json({ error: 'Error al conseguir Rentas 2' })
    }
 });
 
@@ -428,7 +469,7 @@ app.put('/api/rentas/:id', verificarToken, esAdmin, async (req, res) => {
 app.delete('/api/rentas/:id', verificarToken, esAdmin, async (req, res) => {
    const { id } = req.params;
    try {
-      const result = await db.query('DELETE FROM ventas WHERE id = $1 RETURNING *', [id]);  
+      const result = await db.query('DELETE FROM ventas WHERE id = $1 RETURNING *', [id]);
       res.json({
          message: 'Renta eliminada con éxito',
          ventaEliminada: result.rows[0]
@@ -518,13 +559,13 @@ app.get('/api/accesorios', async (req, res) => {
 //Crear PDFs de recibos
 app.post('/api/reciboPdf', verificarToken, esAdmin, async (req, res) => {
    const datosVenta = req.body;
-   console.log("Los datos que llegan a la API:", datosVenta);         
-   
+   console.log("Los datos que llegan a la API:", datosVenta);
+
    try {
       // 1. SOLUCIÓN SEGURIDAD: Usamos consultas parametrizadas ($1 o ?) para evitar Inyección SQL
       const query = `SELECT name, precio_renta FROM productos WHERE id = $1`;
       const result = await db.query(query, [datosVenta.productId]);
-      
+
       // 2. EXTRAER PRODUCTO: Dependiendo de tu librería (pg, mysql2), los datos vienen en lugares distintos.
       // Si usas 'pg' de PostgreSQL es result.rows[0]. Si usas 'mysql2' suele ser result[0].
       const producto = result.rows ? result.rows[0] : result[0];
@@ -579,5 +620,5 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // 2. El atrapa-todo definitivo que repara el error del asterisco
 app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dist', 'index.html'));
+   res.sendFile(path.join(__dirname, 'public', 'dist', 'index.html'));
 });

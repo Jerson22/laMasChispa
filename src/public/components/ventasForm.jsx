@@ -21,6 +21,8 @@ export default function VentasForm() {
       anticipoTarjeta: '',
       pendienteEfectivo: '',
       pendienteTarjeta: '',
+      extraEfectivo: '',
+      extraTarjeta: '',
       liquidado: false,
       notas: '',
       telefono: '',
@@ -79,6 +81,8 @@ export default function VentasForm() {
                anticipoTarjeta: data.anticipoTarjeta || '',
                pendienteEfectivo: data.pendienteEfectivo || '',
                pendienteTarjeta: data.pendienteTarjeta || '',
+               extraEfectivo: data.extraEfectivo || '',
+               extraTarjeta: data.extraTarjeta || '',
                liquidado: data.liquidado === "1",
                notas: data.notas || '',
                telefono: data.telefono || '',
@@ -212,6 +216,38 @@ export default function VentasForm() {
 
       // 1. Determinar si estamos editando o creando
       const isEditing = !!id; // Esto es true si existe id, false si es undefined
+      
+      // 2. Validar disponibilidad de fechas primero
+      if (ventasForm.productId && ventasForm.fechaEntrega && ventasForm.fechaDevolucion) {
+         try {
+            const valRes = await fetch('/api/validar-disponibilidad', {
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json',
+                  'auth-token': token
+               },
+               body: JSON.stringify({
+                  productId: Number(ventasForm.productId),
+                  fechaEntrega: ventasForm.fechaEntrega,
+                  fechaDevolucion: ventasForm.fechaDevolucion,
+                  excludeId: isEditing ? id : null
+               })
+            });
+            const valData = await valRes.json();
+            
+            if (!valRes.ok) throw new Error(valData.error || 'Error al validar fechas');
+            
+            if (!valData.disponible) {
+               alert(`⚠️ El vestido seleccionado ya está ocupado en esas fechas.\n\nChoque con la renta #${valData.conflicto.id} (a nombre de ${valData.conflicto.name}), que abarca del ${valData.conflicto.fechaEntrega.split('T')[0]} al ${valData.conflicto.fechaDevolucion.split('T')[0]}.\n\nPor favor, cambia las fechas o selecciona otro vestido.`);
+               return; // Detenemos el guardado
+            }
+         } catch (error) {
+            console.error('Error de validación:', error);
+            alert('Error al verificar la disponibilidad de las fechas.');
+            return;
+         }
+      }
+
       const url = isEditing ? `/api/ventas/${id}` : '/api/ventas';
       const method = isEditing ? 'PUT' : 'POST';
 
@@ -230,6 +266,8 @@ export default function VentasForm() {
             pendienteEfectivo: Number(ventasForm.pendienteEfectivo),
             anticipoTarjeta: Number(ventasForm.anticipoTarjeta),
             pendienteTarjeta: Number(ventasForm.pendienteTarjeta),
+            extraEfectivo: Number(ventasForm.extraEfectivo),
+            extraTarjeta: Number(ventasForm.extraTarjeta),
             liquidado: ventasForm.liquidado ? "1" : "0",
             notas: ventasForm.notas,
             telefono: ventasForm.telefono,
@@ -270,6 +308,8 @@ export default function VentasForm() {
                anticipoTarjeta: '',
                pendienteEfectivo: '',
                pendienteTarjeta: '',
+               extraEfectivo: '',
+               extraTarjeta: '',
                liquidado: false,
                notas: '',
                telefono: '',
@@ -633,7 +673,7 @@ export default function VentasForm() {
                      />
                   </div>
 
-                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
                      <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
                         <h3 className="mb-4 text-base font-semibold text-gray-900">Anticipo</h3>
                         <div className="space-y-4">
@@ -679,6 +719,32 @@ export default function VentasForm() {
                                  type="number"
                                  name="pendienteTarjeta"
                                  value={ventasForm.pendienteTarjeta}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
+                        <h3 className="mb-4 text-base font-semibold text-gray-900">Extra</h3>
+                        <div className="space-y-4">
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
+                              <input
+                                 type="number"
+                                 name="extraEfectivo"
+                                 value={ventasForm.extraEfectivo}
+                                 onChange={handleVentasChange}
+                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                              />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
+                              <input
+                                 type="number"
+                                 name="extraTarjeta"
+                                 value={ventasForm.extraTarjeta}
                                  onChange={handleVentasChange}
                                  className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                               />

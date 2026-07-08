@@ -31,3 +31,10 @@ ALTER TABLE IF EXISTS public.ventas
 
 ALTER TABLE IF EXISTS public.ventas
     RENAME "mangaPuño" TO "mangaPuno";
+
+
+ALTER TABLE IF EXISTS public.ventas
+    ADD COLUMN "extraEfectivo" numeric;
+
+ALTER TABLE IF EXISTS public.ventas
+    ADD COLUMN "extraTarjeta" numeric;

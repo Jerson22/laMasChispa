@@ -10,11 +10,11 @@ const __dirname = path.dirname(__filename);
 // FUNCIÓN AUXILIAR: Convierte '2026-06-29' a 'Lunes, 29 de junio de 2026'
 function formatearFechaTexto(fechaStr) {
    if (!fechaStr) return '';
-   
+
    // Extraemos solo la fecha (YYYY-MM-DD)
    const fechaLimpia = String(fechaStr).slice(0, 10);
    const fecha = new Date(fechaLimpia + 'T00:00:00');
-   
+
    if (isNaN(fecha.getTime())) return fechaStr;
 
    const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -49,6 +49,10 @@ export async function CrearReciboPDF(datosVenta) {
    const fechaEntregaTexto = formatearFechaTexto(datosVenta.fechaEntrega);
    const fechaDevolucionTexto = formatearFechaTexto(datosVenta.fechaDevolucion || datosVenta.fechaEntrega);
    const fechaAjustesTexto = formatearFechaTexto(datosVenta.fechaAjuste || datosVenta.fechaAjuste);
+
+   const extraEfectivo = parseFloat(datosVenta.extraEfectivo || 0);
+   const extraTarjeta = parseFloat(datosVenta.extraTarjeta || 0);
+   const extraTotal = extraEfectivo + extraTarjeta;
 
    const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -173,6 +177,9 @@ export async function CrearReciboPDF(datosVenta) {
                      </span>
                   </div>
                </div>
+               ${extraTotal > 0 ? `<div style="text-align: right; font-size: 14px; margin-top: 8px; color: #555; padding-right: 40px;">
+                  * Cargos por días extra acordados: $${extraTotal}
+               </div>` : ''}
                <div style="margin-top:15px; text-align: center; font-size: 25px; font-weight: bold; font-style: italic; padding: 20px 40px; ">
                   Horario para recoger tu vestido: 1 p.m. a 8 p.m.
                </div>
