@@ -7,6 +7,7 @@ export default function VentasForm() {
    const [clientes, setClientes] = useState([]);
 
    const [ventasForm, setVentasForm] = useState({
+      id: '',
       name: '',
       productId: '',
       bolso: false,
@@ -64,6 +65,7 @@ export default function VentasForm() {
             // console.log('Respuesta de Venta: ', data);
             // rellenar el formulario si hay datos
             setVentasForm({
+               id: data.id || id,
                name: data.name || '',
                productId: data.productId || '',
                bolso: data.bolso === "1",

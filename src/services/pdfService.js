@@ -133,7 +133,7 @@ export async function CrearReciboPDF(datosVenta) {
                   <div class="header-right">
                      <div class="tabla-recibo">
                         <div class="fila-superior">
-                           No. ${datosVenta.productId}
+                           No. ${datosVenta.id}
                         </div>
                         <div class="fila-inferior">
                            <div class="columna-fecha">Día<br><p style="font-weight:bold; font-size: 26px; color: black; margin:0;">${dia}</p></div>
