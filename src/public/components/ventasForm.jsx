@@ -282,10 +282,8 @@ export default function VentasForm() {
             });
             setProductSearch('');
             setSelectedProduct(null);
-         } else {
-            // Si fue edición, podrías redirigir al listado o simplemente dejar el form tal cual
-            navigate('/admin/rentas');
          }
+         navigate('/admin/rentas');
 
       } catch (err) {
          alert(err.message);

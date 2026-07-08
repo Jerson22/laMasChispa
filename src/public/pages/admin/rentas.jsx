@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MdEdit, MdDelete } from "react-icons/md";
 import { AiOutlineClear } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
+import { IoReceiptOutline } from "react-icons/io5";
 
 // 💡 FUNCIÓN ASISTENTE CORREGIDA: Extrae estrictamente la fecha textual (YYYY-MM-DD) e ignora la zona horaria
 const formatearFechaSafe = (fechaString, opciones) => {
@@ -188,6 +189,36 @@ export default function Rentas() {
          }
       } catch (error) {
          console.error('Error en la conexión:', error);
+      }
+   };
+
+   const handleDownloadPdf = async (renta) => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+         const response = await fetch('/api/reciboPdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'auth-token': token },
+            body: JSON.stringify(renta)
+         });
+
+         if (!response.ok) throw new Error("Error en el servidor");
+
+         const blob = await response.blob();
+         const urlDescarga = window.URL.createObjectURL(blob);
+         const linkTemporal = document.createElement('a');
+         linkTemporal.href = urlDescarga;
+         linkTemporal.download = `Recibo_Renta_${renta.id}.pdf`;
+
+         document.body.appendChild(linkTemporal);
+         linkTemporal.click();
+         linkTemporal.remove();
+         window.URL.revokeObjectURL(urlDescarga);
+
+      } catch (error) {
+         console.error("Error al descargar:", error);
+         alert("Hubo un error al generar el PDF.");
       }
    };
 
@@ -436,6 +467,9 @@ export default function Rentas() {
                            <td className="px-4 py-4 text-sm text-gray-700">{formatearFechaSafe(renta.fechaDevolucion, opciones)}</td>
                            <td className="px-4 py-4">
                               <div className="flex items-center gap-2">
+                                 <button className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 text-lg text-pink-700 shadow-sm transition hover:bg-pink-200 hover:text-pink-700 shadow-sm" onClick={() => handleDownloadPdf(renta)}>
+                                    <IoReceiptOutline />
+                                 </button>
                                  <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-gray-600 shadow-sm transition hover:bg-pink-50 hover:text-pink-600" onClick={() => navigate(`/admin/renta/${renta.id}`)}>
                                     <MdEdit />
                                  </button>
@@ -495,6 +529,9 @@ export default function Rentas() {
                            <option value="tintoreria">Tintorería</option>
                            <option value="en tienda">En tienda</option>
                         </select>
+                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 text-lg text-pink-700 shadow-sm transition hover:bg-pink-200 hover:text-pink-700 shadow-sm" onClick={() => handleDownloadPdf(renta)}>
+                           <IoReceiptOutline />
+                        </button>
                         <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-gray-600 shadow-sm" onClick={() => navigate(`/admin/renta/${renta.id}`)}>
                            <MdEdit />
                         </button>

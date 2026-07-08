@@ -10,7 +10,11 @@ const __dirname = path.dirname(__filename);
 // FUNCIÓN AUXILIAR: Convierte '2026-06-29' a 'Lunes, 29 de junio de 2026'
 function formatearFechaTexto(fechaStr) {
    if (!fechaStr) return '';
-   const fecha = new Date(fechaStr + 'T00:00:00');
+   
+   // Extraemos solo la fecha (YYYY-MM-DD)
+   const fechaLimpia = String(fechaStr).slice(0, 10);
+   const fecha = new Date(fechaLimpia + 'T00:00:00');
+   
    if (isNaN(fecha.getTime())) return fechaStr;
 
    const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -32,7 +36,8 @@ export async function CrearReciboPDF(datosVenta) {
    // Procesamiento para el recuadro numérico superior derecho
    let dia = '', mes = '', ano = '';
    if (datosVenta?.fechaRenta) {
-      const fecha = new Date(datosVenta.fechaRenta + 'T00:00:00');
+      const fechaLimpia = String(datosVenta.fechaRenta).slice(0, 10);
+      const fecha = new Date(fechaLimpia + 'T00:00:00');
       if (!isNaN(fecha.getTime())) {
          dia = String(fecha.getDate()).padStart(2, '0');
          mes = String(fecha.getMonth() + 1).padStart(2, '0');
