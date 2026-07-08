@@ -43,7 +43,7 @@ export async function CrearReciboPDF(datosVenta) {
    // Formatear las fechas largas para el cuerpo del recibo
    const fechaEntregaTexto = formatearFechaTexto(datosVenta.fechaEntrega);
    const fechaDevolucionTexto = formatearFechaTexto(datosVenta.fechaDevolucion || datosVenta.fechaEntrega);
-   const fechaAjustesTexto = formatearFechaTexto(datosVenta.fechaAjustes || datosVenta.fechaAjustes);
+   const fechaAjustesTexto = formatearFechaTexto(datosVenta.fechaAjuste || datosVenta.fechaAjuste);
 
    const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox']
