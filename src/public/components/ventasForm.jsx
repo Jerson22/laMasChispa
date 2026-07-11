@@ -217,6 +217,11 @@ export default function VentasForm() {
       // 1. Determinar si estamos editando o creando
       const isEditing = !!id; // Esto es true si existe id, false si es undefined
       
+      if (!ventasForm.fechaRenta) {
+         alert('⚠️ Por favor, selecciona la Fecha de Renta.');
+         return;
+      }
+      
       // 2. Validar disponibilidad de fechas primero
       if (ventasForm.productId && ventasForm.fechaEntrega && ventasForm.fechaDevolucion) {
          try {
@@ -385,11 +390,24 @@ export default function VentasForm() {
    return (
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
          <section className="rounded-[28px] bg-white p-4 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
-            <div className="mb-6">
-               <h2 className="text-2xl font-semibold text-gray-900">{editandoFlag ? `Tarjeta #${id}` : 'Nueva Venta'}</h2>
-            </div>
-
             <form onSubmit={handleVentaSubmit} className="space-y-6">
+               <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 pb-4">
+                  <h2 className="text-2xl font-semibold text-gray-900">{editandoFlag ? `Tarjeta #${id}` : 'Nueva Venta'}</h2>
+                  
+                  {/* Desktop Fecha de Renta */}
+                  <div className="hidden lg:flex items-center gap-3">
+                     <label className="block text-sm font-semibold text-gray-600 whitespace-nowrap">Fecha de Renta</label>
+                     <input
+                        type="date"
+                        name="fechaRenta"
+                        value={ventasForm.fechaRenta}
+                        onChange={handleVentasChange}
+                        className="block w-48 appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                        style={{ WebkitAppearance: 'none' }}
+                     />
+                  </div>
+               </div>
+
                <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
                   <div className="space-y-6 order-1 lg:order-none">
                      <div className="grid gap-6 sm:grid-cols-2">
@@ -440,6 +458,19 @@ export default function VentasForm() {
                               className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
                            />
                         </div>
+                     </div>
+
+                     {/* Mobile Fecha de Renta */}
+                     <div className="block lg:hidden space-y-3">
+                        <label className="block text-sm font-semibold text-gray-600">Fecha de Renta</label>
+                        <input
+                           type="date"
+                           name="fechaRenta"
+                           value={ventasForm.fechaRenta}
+                           onChange={handleVentasChange}
+                           className="block w-full appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                           style={{ WebkitAppearance: 'none' }}
+                        />
                      </div>
 
                      <div className="relative">
@@ -551,18 +582,6 @@ export default function VentasForm() {
                   </div>
 
                   <div className="space-y-6 order-3 lg:order-none">
-                     <div className="space-y-3 min-w-0">
-                        <label className="block text-sm font-semibold text-gray-600">Fecha de Renta</label>
-                        <input
-                           type="date"
-                           name="fechaRenta"
-                           value={ventasForm.fechaRenta}
-                           onChange={handleVentasChange}
-                           required
-                           className="block w-full max-w-full shrink appearance-none rounded-3xl border border-gray-200 bg-gray-50 px-3 sm:px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                           style={{ WebkitAppearance: 'none' }}
-                        />
-                     </div>
                      <div className="space-y-3 min-w-0">
                         <label className="block text-sm font-semibold text-gray-600">Fecha de Entrega</label>
                         <input
