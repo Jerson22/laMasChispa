@@ -414,7 +414,6 @@ export default function Rentas() {
                                              <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-2 text-sm text-gray-700">
                                                 <p><strong>Precio Renta:</strong> ${precioDeRenta}</p>
                                                 <p className="mt-1"><strong>Anticipo Total:</strong> ${totalAnticipos}</p>
-                                                <p className="mt-1 text-xs text-emerald-700">(Efec: ${renta.anticipoEfectivo || 0} | Tarj: ${renta.anticipoTarjeta || 0})</p>
                                                 <div className="mt-2 flex items-center justify-between border-t border-emerald-100 pt-2 text-sm font-semibold">
                                                    <span>Falta por pagar:</span>
                                                    <span className="text-red-600">${faltaPorPagarCalculado}</span>

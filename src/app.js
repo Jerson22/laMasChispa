@@ -41,6 +41,67 @@ const upload = multer({ storage: storage });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public', 'dist')));
 
+// Inicialización de pagos_renta y migración histórica
+async function inicializarBaseDatos() {
+   try {
+      await db.query(`
+         CREATE TABLE IF NOT EXISTS public.pagos_renta (
+            id SERIAL PRIMARY KEY,
+            venta_id integer NOT NULL REFERENCES public.ventas(id) ON DELETE CASCADE,
+            categoria character varying(50) NOT NULL,
+            metodo character varying(50) NOT NULL,
+            monto numeric(10,2) NOT NULL,
+            fecha_pago date NOT NULL DEFAULT CURRENT_DATE,
+            created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+         );
+      `);
+      console.log('✅ Tabla pagos_renta verificada/creada');
+
+      const checkRes = await db.query('SELECT COUNT(*) FROM public.pagos_renta');
+      const count = parseInt(checkRes.rows[0].count, 10);
+
+      if (count === 0) {
+         console.log('🔄 Ejecutando migración inicial de pagos históricos...');
+         const ventas = await db.query('SELECT id, "fechaRenta", "fechaEntrega", "fechaDevolucion", "anticipoEfectivo", "anticipoTarjeta", "pendienteEfectivo", "pendienteTarjeta", "extraEfectivo", "extraTarjeta" FROM public.ventas');
+         
+         const formatearFecha = (fRaw) => {
+            if (!fRaw) return new Date().toISOString().split('T')[0];
+            if (fRaw instanceof Date) return fRaw.toISOString().split('T')[0];
+            return String(fRaw).split('T')[0];
+         };
+
+         for (const v of ventas.rows) {
+            const fRenta = formatearFecha(v.fechaRenta);
+            const fEntrega = formatearFecha(v.fechaEntrega);
+            const fDevolucion = formatearFecha(v.fechaDevolucion);
+
+            if (parseFloat(v.anticipoEfectivo || 0) > 0) {
+               await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [v.id, 'anticipo', 'efectivo', v.anticipoEfectivo, fRenta]);
+            }
+            if (parseFloat(v.anticipoTarjeta || 0) > 0) {
+               await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [v.id, 'anticipo', 'tarjeta', v.anticipoTarjeta, fRenta]);
+            }
+            if (parseFloat(v.pendienteEfectivo || 0) > 0) {
+               await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [v.id, 'pendiente', 'efectivo', v.pendienteEfectivo, fEntrega]);
+            }
+            if (parseFloat(v.pendienteTarjeta || 0) > 0) {
+               await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [v.id, 'pendiente', 'tarjeta', v.pendienteTarjeta, fEntrega]);
+            }
+            if (parseFloat(v.extraEfectivo || 0) > 0) {
+               await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [v.id, 'extra', 'efectivo', v.extraEfectivo, fDevolucion]);
+            }
+            if (parseFloat(v.extraTarjeta || 0) > 0) {
+               await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [v.id, 'extra', 'tarjeta', v.extraTarjeta, fDevolucion]);
+            }
+         }
+         console.log('✅ Migración inicial completada con éxito');
+      }
+   } catch (error) {
+      console.error('❌ Error al inicializar base de datos / pagos_renta:', error);
+   }
+}
+inicializarBaseDatos();
+
 //Para Login y registrar usuarios nuevos
 app.use('/auth', authRoutes);
 
@@ -313,6 +374,23 @@ app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
       );
       const reservaId = ventasResult.rows[0].id;
 
+      // Insertar anticipos en pagos_renta si son mayores a 0
+      const fRenta = fechaRenta ? String(fechaRenta).split('T')[0] : new Date().toISOString().split('T')[0];
+      if (parseFloat(anticipoEfectivo || 0) > 0) {
+         await db.query('INSERT INTO pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [reservaId, 'anticipo', 'efectivo', parseFloat(anticipoEfectivo), fRenta]);
+      }
+      if (parseFloat(anticipoTarjeta || 0) > 0) {
+         await db.query('INSERT INTO public.pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [reservaId, 'anticipo', 'tarjeta', parseFloat(anticipoTarjeta), fRenta]);
+      }
+
+      // Insertar cargos extra en pagos_renta si son mayores a 0
+      if (parseFloat(extraEfectivo || 0) > 0) {
+         await db.query('INSERT INTO pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [reservaId, 'extra', 'efectivo', parseFloat(extraEfectivo), fRenta]);
+      }
+      if (parseFloat(extraTarjeta || 0) > 0) {
+         await db.query('INSERT INTO pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)', [reservaId, 'extra', 'tarjeta', parseFloat(extraTarjeta), fRenta]);
+      }
+
       res.status(201).json({ mensaje: 'Venta creada', reservaId });
    } catch (error) {
       console.error(error);
@@ -462,6 +540,200 @@ app.put('/api/rentas/:id', verificarToken, esAdmin, async (req, res) => {
    } catch (error) {
       console.error('Error al actualizar la base de datos:', error);
       res.status(500).json({ error: 'Error interno del servidor al actualizar el estado' });
+   }
+});
+
+// Función auxiliar para sincronizar acumulados de pagos en la tabla ventas
+async function syncVentaPagos(ventaId) {
+   const pagosRes = await db.query('SELECT categoria, metodo, monto FROM pagos_renta WHERE venta_id = $1', [ventaId]);
+   
+   let anticipoEfectivo = 0;
+   let anticipoTarjeta = 0;
+   let pendienteEfectivo = 0;
+   let pendienteTarjeta = 0;
+   let extraEfectivo = 0;
+   let extraTarjeta = 0;
+
+   for (const p of pagosRes.rows) {
+      const m = parseFloat(p.monto || 0);
+      if (p.categoria === 'anticipo') {
+         if (p.metodo === 'efectivo') anticipoEfectivo += m;
+         else if (p.metodo === 'tarjeta') anticipoTarjeta += m;
+      } else if (p.categoria === 'pendiente') {
+         if (p.metodo === 'efectivo') pendienteEfectivo += m;
+         else if (p.metodo === 'tarjeta') pendienteTarjeta += m;
+      } else if (p.categoria === 'extra') {
+         if (p.metodo === 'efectivo') extraEfectivo += m;
+         else if (p.metodo === 'tarjeta') extraTarjeta += m;
+      }
+   }
+
+   await db.query(
+      `UPDATE public.ventas 
+       SET "anticipoEfectivo" = $1, "anticipoTarjeta" = $2, "pendienteEfectivo" = $3, "pendienteTarjeta" = $4, "extraEfectivo" = $5, "extraTarjeta" = $6 
+       WHERE id = $7`,
+      [anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, ventaId]
+   );
+}
+
+// Función auxiliar para agrupar pagos del mismo día y método, excluyendo la agrupación entre anticipo y pendiente
+function agruparPagos(pagos) {
+   const grupos = {};
+   for (const p of pagos) {
+      const fecha = p.fecha_pago instanceof Date 
+         ? p.fecha_pago.toISOString().split('T')[0] 
+         : String(p.fecha_pago).split('T')[0];
+      
+      const key = `${p.venta_id || ''}_${fecha}_${p.metodo}`;
+      if (!grupos[key]) {
+         grupos[key] = [];
+      }
+      grupos[key].push(p);
+   }
+
+   const resultado = [];
+   for (const key in grupos) {
+      const lista = grupos[key];
+      const anticipos = lista.filter(x => x.categoria === 'anticipo');
+      const pendientes = lista.filter(x => x.categoria === 'pendiente');
+      const extras = lista.filter(x => x.categoria === 'extra');
+
+      if (anticipos.length > 0 && pendientes.length > 0) {
+         // Grupo 1: Anticipo + Extras
+         const montoA = anticipos.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0) + 
+                        extras.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0);
+         const idsA = [...anticipos, ...extras].map(x => x.id).join(',');
+         const catsA = ['anticipo', ...extras.map(() => 'extra')].filter((v, i, a) => a.indexOf(v) === i).join(', ');
+         
+         resultado.push({
+            ...anticipos[0],
+            monto: montoA,
+            categoria: catsA,
+            ids: idsA
+         });
+
+         // Grupo 2: Pendiente
+         const montoP = pendientes.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0);
+         const idsP = pendientes.map(x => x.id).join(',');
+         
+         resultado.push({
+            ...pendientes[0],
+            monto: montoP,
+            categoria: 'pendiente',
+            ids: idsP
+         });
+      } else {
+         const montoTotal = lista.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0);
+         const idsTotal = lista.map(x => x.id).join(',');
+         const catsTotal = lista.map(x => x.categoria).filter((v, i, a) => a.indexOf(v) === i).join(', ');
+
+         resultado.push({
+            ...lista[0],
+            monto: montoTotal,
+            categoria: catsTotal,
+            ids: idsTotal
+         });
+      }
+   }
+   return resultado;
+}
+
+// Endpoints para Historial de Pagos
+app.get('/api/ventas/:id/pagos', verificarToken, esAdmin, async (req, res) => {
+   const { id } = req.params;
+   try {
+      const result = await db.query('SELECT * FROM pagos_renta WHERE venta_id = $1 ORDER BY fecha_pago ASC, id ASC', [id]);
+      const agrupados = agruparPagos(result.rows);
+      res.json(agrupados);
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener los pagos de la renta' });
+   }
+});
+
+app.post('/api/ventas/:id/pagos', verificarToken, esAdmin, async (req, res) => {
+   const { id } = req.params;
+   const { categoria, metodo, monto, fecha_pago } = req.body;
+   
+   if (!categoria || !metodo || isNaN(parseFloat(monto)) || parseFloat(monto) <= 0) {
+      return res.status(400).json({ error: 'Datos de pago inválidos o incompletos' });
+   }
+
+   try {
+      await db.query(
+         'INSERT INTO pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)',
+         [id, categoria, metodo, parseFloat(monto), fecha_pago || new Date().toISOString().split('T')[0]]
+      );
+      
+      await syncVentaPagos(id);
+      res.status(201).json({ mensaje: 'Pago registrado y sincronizado con éxito' });
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al registrar el pago' });
+   }
+});
+
+app.delete('/api/pagos/:ids', verificarToken, esAdmin, async (req, res) => {
+   const { ids } = req.params; // ids puede ser "12" o "12,13"
+   const idList = ids.split(',').map(Number);
+   try {
+      const pagoRes = await db.query('SELECT venta_id FROM pagos_renta WHERE id = ANY($1)', [idList]);
+      if (pagoRes.rows.length === 0) {
+         return res.status(404).json({ error: 'Pago no encontrado' });
+      }
+      const ventaId = pagoRes.rows[0].venta_id;
+
+      await db.query('DELETE FROM pagos_renta WHERE id = ANY($1)', [idList]);
+      await syncVentaPagos(ventaId);
+      res.json({ mensaje: 'Pago(s) eliminado(s) y sincronizado(s) con éxito' });
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar el pago' });
+   }
+});
+
+// Endpoint para Reportes Contables (Agrupado por día, método y renta)
+app.get('/api/ingresos/reporte', verificarToken, esAdmin, async (req, res) => {
+   const { desde, hasta } = req.query;
+   try {
+      let query = `
+         SELECT 
+            pr.id,
+            pr.venta_id,
+            pr.fecha_pago,
+            pr.metodo,
+            pr.monto,
+            pr.categoria,
+            v.name as cliente_nombre, 
+            p.name as producto_nombre
+         FROM pagos_renta pr
+         INNER JOIN ventas v ON pr.venta_id = v.id
+         LEFT JOIN productos p ON v."productId" = p.id
+      `;
+      const params = [];
+      let whereClauses = [];
+      
+      if (desde) {
+         params.push(desde);
+         whereClauses.push(`pr.fecha_pago >= $${params.length}`);
+      }
+      if (hasta) {
+         params.push(hasta);
+         whereClauses.push(`pr.fecha_pago <= $${params.length}`);
+      }
+
+      if (whereClauses.length > 0) {
+         query += ` WHERE ` + whereClauses.join(' AND ');
+      }
+
+      query += ` ORDER BY pr.fecha_pago DESC, pr.id DESC`;
+
+      const result = await db.query(query, params);
+      const agrupados = agruparPagos(result.rows);
+      res.json(agrupados);
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener el reporte de ingresos' });
    }
 });
 

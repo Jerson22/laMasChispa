@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 
+const obtenerFechaLocalYMD = () => {
+   const d = new Date();
+   const offset = d.getTimezoneOffset();
+   const localDate = new Date(d.getTime() - (offset * 60 * 1000));
+   return localDate.toISOString().split('T')[0];
+};
+
 export default function VentasForm() {
    const { id } = useParams();
    const [productos, setProductos] = useState([]);
@@ -14,7 +21,7 @@ export default function VentasForm() {
       aretes: false,
       ajuste: false,
       fechaAjuste: '',
-      fechaRenta: '',
+      fechaRenta: obtenerFechaLocalYMD(),
       fechaEntrega: '',
       fechaDevolucion: '',
       anticipoEfectivo: '',
@@ -48,6 +55,112 @@ export default function VentasForm() {
    // Estados para token y navigate
    const navigate = useNavigate();
    const { token } = useOutletContext();
+
+   // ESTADOS PARA HISTORIAL DE ABONOS (OPCIÓN 2)
+   const [pagos, setPagos] = useState([]);
+   const [nuevoPago, setNuevoPago] = useState({
+      categoria: 'pendiente',
+      metodo: 'efectivo',
+      monto: '',
+      fecha_pago: obtenerFechaLocalYMD()
+   });
+
+   const fetchPagos = async () => {
+      if (!id) return;
+      try {
+         const res = await fetch(`/api/ventas/${id}/pagos`, {
+            headers: { 'auth-token': token }
+         });
+         if (res.ok) {
+            const data = await res.json();
+            setPagos(data);
+         }
+      } catch (err) {
+         console.error('Error fetching pagos:', err);
+      }
+   };
+
+   const handleAgregarPago = async () => {
+      if (!nuevoPago.monto || parseFloat(nuevoPago.monto) <= 0) {
+         alert('Por favor introduce un monto válido.');
+         return;
+      }
+      try {
+         const response = await fetch(`/api/ventas/${id}/pagos`, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               'auth-token': token
+            },
+            body: JSON.stringify(nuevoPago)
+         });
+         if (response.ok) {
+            setNuevoPago(prev => ({
+               ...prev,
+               monto: '',
+               fecha_pago: obtenerFechaLocalYMD()
+            }));
+            await fetchPagos();
+            
+            // Actualizar el formulario con los nuevos totales sincronizados
+            const ventaRes = await fetch(`/api/renta/${id}`, {
+               headers: { 'auth-token': token }
+            });
+            if (ventaRes.ok) {
+               const data = await ventaRes.json();
+               setVentasForm(prev => ({
+                  ...prev,
+                  anticipoEfectivo: data.anticipoEfectivo || '',
+                  anticipoTarjeta: data.anticipoTarjeta || '',
+                  pendienteEfectivo: data.pendienteEfectivo || '',
+                  pendienteTarjeta: data.pendienteTarjeta || '',
+                  extraEfectivo: data.extraEfectivo || '',
+                  extraTarjeta: data.extraTarjeta || '',
+                  liquidado: data.liquidado === "1"
+               }));
+            }
+         } else {
+            const err = await response.json();
+            alert(err.error || 'Error al agregar pago');
+         }
+      } catch (error) {
+         console.error(error);
+         alert('Error al conectar con el servidor');
+      }
+   };
+
+   const handleEliminarPago = async (pagoId) => {
+      if (!confirm('¿Estás seguro de que deseas eliminar este pago del historial?')) return;
+      try {
+         const response = await fetch(`/api/pagos/${pagoId}`, {
+            method: 'DELETE',
+            headers: { 'auth-token': token }
+         });
+         if (response.ok) {
+            await fetchPagos();
+            const ventaRes = await fetch(`/api/renta/${id}`, {
+               headers: { 'auth-token': token }
+            });
+            if (ventaRes.ok) {
+               const data = await ventaRes.json();
+               setVentasForm(prev => ({
+                  ...prev,
+                  anticipoEfectivo: data.anticipoEfectivo || '',
+                  anticipoTarjeta: data.anticipoTarjeta || '',
+                  pendienteEfectivo: data.pendienteEfectivo || '',
+                  pendienteTarjeta: data.pendienteTarjeta || '',
+                  extraEfectivo: data.extraEfectivo || '',
+                  extraTarjeta: data.extraTarjeta || '',
+                  liquidado: data.liquidado === "1"
+               }));
+            }
+         } else {
+            alert('Error al eliminar el pago');
+         }
+      } catch (error) {
+         console.error(error);
+      }
+   };
 
 
 
@@ -102,6 +215,7 @@ export default function VentasForm() {
       fetchProductos();
       fetchClientes();
       fetchVenta();
+      fetchPagos();
    }, [id, token]);
 
    // Este se dispara cuando cambia el productId (que viene de la BD) o la lista de productos
@@ -216,12 +330,12 @@ export default function VentasForm() {
 
       // 1. Determinar si estamos editando o creando
       const isEditing = !!id; // Esto es true si existe id, false si es undefined
-      
+
       if (!ventasForm.fechaRenta) {
          alert('⚠️ Por favor, selecciona la Fecha de Renta.');
          return;
       }
-      
+
       // 2. Validar disponibilidad de fechas primero
       if (ventasForm.productId && ventasForm.fechaEntrega && ventasForm.fechaDevolucion) {
          try {
@@ -239,9 +353,9 @@ export default function VentasForm() {
                })
             });
             const valData = await valRes.json();
-            
+
             if (!valRes.ok) throw new Error(valData.error || 'Error al validar fechas');
-            
+
             if (!valData.disponible) {
                alert(`⚠️ El vestido seleccionado ya está ocupado en esas fechas.\n\nChoque con la renta #${valData.conflicto.id} (a nombre de ${valData.conflicto.name}), que abarca del ${valData.conflicto.fechaEntrega.split('T')[0]} al ${valData.conflicto.fechaDevolucion.split('T')[0]}.\n\nPor favor, cambia las fechas o selecciona otro vestido.`);
                return; // Detenemos el guardado
@@ -393,7 +507,7 @@ export default function VentasForm() {
             <form onSubmit={handleVentaSubmit} className="space-y-6">
                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 pb-4">
                   <h2 className="text-2xl font-semibold text-gray-900">{editandoFlag ? `Tarjeta #${id}` : 'Nueva Venta'}</h2>
-                  
+
                   {/* Desktop Fecha de Renta */}
                   <div className="hidden lg:flex items-center gap-3">
                      <label className="block text-sm font-semibold text-gray-600 whitespace-nowrap">Fecha de Renta</label>
@@ -680,7 +794,7 @@ export default function VentasForm() {
                   )}
                </div>
 
-               <div className="space-y-4  border-t border-gray-200 pt-6">
+               <div className="space-y-4 border-t border-gray-200 pt-6">
                   <div className="space-y-3">
                      <label className="block text-sm font-semibold text-gray-600">Notas</label>
                      <textarea
@@ -692,98 +806,237 @@ export default function VentasForm() {
                      />
                   </div>
 
-                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
-                     <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
-                        <h3 className="mb-4 text-base font-semibold text-gray-900">Anticipo</h3>
-                        <div className="space-y-4">
-                           <div>
-                              <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
-                              <input
-                                 type="number"
-                                 name="anticipoEfectivo"
-                                 value={ventasForm.anticipoEfectivo}
-                                 onChange={handleVentasChange}
-                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                              />
+                  {!editandoFlag ? (
+                     // MODO CREACIÓN: Campos estáticos simplificados
+                     <div className="grid gap-6 md:grid-cols-3">
+                        <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-6">
+                           <h3 className="mb-4 text-base font-bold text-gray-900">Pago Inicial (Anticipo)</h3>
+                           <div className="space-y-4">
+                              <div>
+                                 <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
+                                 <input
+                                    type="number"
+                                    name="anticipoEfectivo"
+                                    value={ventasForm.anticipoEfectivo}
+                                    onChange={handleVentasChange}
+                                    placeholder="0"
+                                    className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                 />
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
+                                 <input
+                                    type="number"
+                                    name="anticipoTarjeta"
+                                    value={ventasForm.anticipoTarjeta}
+                                    onChange={handleVentasChange}
+                                    placeholder="0"
+                                    className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                 />
+                              </div>
+
+                              <div className="border-t border-gray-200 pt-4 mt-4">
+                                 <h4 className="text-sm font-bold text-gray-700 mb-3">Cargos Días Extra (Opcional)</h4>
+                                 <div className="grid gap-3 grid-cols-2">
+                                    <div>
+                                       <label className="block text-xs font-semibold text-gray-500">Efectivo</label>
+                                       <input
+                                          type="number"
+                                          name="extraEfectivo"
+                                          value={ventasForm.extraEfectivo}
+                                          onChange={handleVentasChange}
+                                          placeholder="0"
+                                          className="mt-1 w-full rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition focus:border-pink-400 focus:ring-1 focus:ring-pink-100"
+                                       />
+                                    </div>
+                                    <div>
+                                       <label className="block text-xs font-semibold text-gray-500">Tarjeta</label>
+                                       <input
+                                          type="number"
+                                          name="extraTarjeta"
+                                          value={ventasForm.extraTarjeta}
+                                          onChange={handleVentasChange}
+                                          placeholder="0"
+                                          className="mt-1 w-full rounded-2xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition focus:border-pink-400 focus:ring-1 focus:ring-pink-100"
+                                       />
+                                    </div>
+                                 </div>
+                              </div>
                            </div>
+                        </div>
+
+                        <div className="rounded-[28px] border border-pink-100 bg-pink-50/30 p-6 flex flex-col justify-between">
                            <div>
-                              <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
+                              <h3 className="mb-4 text-base font-bold text-pink-700">Resumen de Renta</h3>
+                              <div className="space-y-3 text-sm text-gray-700">
+                                 <div className="flex justify-between border-b border-pink-100 pb-1.5">
+                                    <span>Precio Vestido:</span>
+                                    <span className="font-bold text-gray-900">${selectedProduct ? selectedProduct.precio_renta : '0.00'}</span>
+                                 </div>
+                                 <div className="flex justify-between border-b border-pink-100 pb-1.5">
+                                    <span>Días Extra:</span>
+                                    <span className="font-bold text-gray-900">${Number(ventasForm.extraEfectivo || 0) + Number(ventasForm.extraTarjeta || 0)}</span>
+                                 </div>
+                                 <div className="flex justify-between border-b border-pink-100 pb-1.5">
+                                    <span>Anticipo Registrado:</span>
+                                    <span className="font-bold text-emerald-600">${Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0)}</span>
+                                 </div>
+                                 <div className="flex justify-between pt-1">
+                                    <span className="font-semibold text-gray-800">Resta al Entregar:</span>
+                                    <span className="font-extrabold text-red-600">
+                                       ${selectedProduct ? Math.max(0, Number(selectedProduct.precio_renta) - (Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0))) : '0.00'}
+                                    </span>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="flex flex-col justify-center items-center rounded-[28px] border border-gray-200 bg-gray-50 p-6">
+                           <label className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-gray-700 shadow-sm cursor-pointer hover:border-pink-300 transition">
                               <input
-                                 type="number"
-                                 name="anticipoTarjeta"
-                                 value={ventasForm.anticipoTarjeta}
+                                 type="checkbox"
+                                 name="liquidado"
+                                 checked={ventasForm.liquidado}
                                  onChange={handleVentasChange}
-                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                 className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
                               />
+                              Liquidado
+                           </label>
+                        </div>
+                     </div>
+                  ) : (
+                     // MODO EDICIÓN: Historial de Abonos Interactivo (Opción 2)
+                     <div className="space-y-6">
+                        <div className="grid gap-6 md:grid-cols-4">
+                           <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center">
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Precio Renta</p>
+                              <p className="text-xl font-bold text-gray-800">${selectedProduct ? selectedProduct.precio_renta : '0'}</p>
+                           </div>
+                           <div className="rounded-2xl border border-pink-100 bg-pink-50/50 p-4 text-center">
+                              <p className="text-xs font-semibold text-pink-600 uppercase">Total Pagado</p>
+                              <p className="text-xl font-bold text-pink-700">
+                                 ${pagos.reduce((acc, curr) => acc + Number(curr.monto), 0)}
+                              </p>
+                           </div>
+                           <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center">
+                              <p className="text-xs font-semibold text-gray-500 uppercase">Pendiente</p>
+                              <p className="text-xl font-bold text-red-600">
+                                 ${selectedProduct ? Math.max(0, Number(selectedProduct.precio_renta) - pagos.filter(p => p.categoria.includes('anticipo') || p.categoria.includes('pendiente')).reduce((acc, curr) => acc + Number(curr.monto), 0)) : '0'}
+                              </p>
+                           </div>
+                           <div className="flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                              <label className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 cursor-pointer">
+                                 <input
+                                    type="checkbox"
+                                    name="liquidado"
+                                    checked={ventasForm.liquidado}
+                                    onChange={handleVentasChange}
+                                    className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                 />
+                                 Liquidado
+                              </label>
+                           </div>
+                        </div>
+
+                        <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-6">
+                           <h3 className="mb-4 text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">Historial de Abonos</h3>
+                           
+                           {pagos.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                 <table className="w-full text-left text-sm text-gray-700">
+                                    <thead>
+                                       <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
+                                          <th className="py-2 px-3">Fecha</th>
+                                          <th className="py-2 px-3">Concepto</th>
+                                          <th className="py-2 px-3">Método</th>
+                                          <th className="py-2 px-3 text-right">Monto</th>
+                                          <th className="py-2 px-3 text-center">Acciones</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                       {pagos.map((p) => (
+                                          <tr key={p.ids} className="hover:bg-white/50 transition">
+                                             <td className="py-2.5 px-3 whitespace-nowrap">{new Date(p.fecha_pago).toISOString().split('T')[0]}</td>
+                                             <td className="py-2.5 px-3 capitalize font-semibold">{p.categoria}</td>
+                                             <td className="py-2.5 px-3 capitalize">{p.metodo}</td>
+                                             <td className="py-2.5 px-3 text-right font-bold text-pink-600">${p.monto}</td>
+                                             <td className="py-2.5 px-3 text-center">
+                                                <button
+                                                   type="button"
+                                                   onClick={() => handleEliminarPago(p.ids)}
+                                                   className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-lg transition"
+                                                >
+                                                   Eliminar
+                                                </button>
+                                             </td>
+                                          </tr>
+                                       ))}
+                                    </tbody>
+                                 </table>
+                              </div>
+                           ) : (
+                              <p className="text-sm text-gray-500 py-2">No se han registrado abonos para esta renta.</p>
+                           )}
+
+                           <div className="mt-6 border-t border-gray-200 pt-6">
+                              <h4 className="mb-4 text-sm font-bold text-gray-800 uppercase">Registrar Nuevo Abono</h4>
+                              <div className="grid gap-4 sm:grid-cols-5 items-end">
+                                 <div>
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase">Concepto</label>
+                                    <select
+                                       value={nuevoPago.categoria}
+                                       onChange={(e) => setNuevoPago({ ...nuevoPago, categoria: e.target.value })}
+                                       className="mt-1 w-full rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                    >
+                                       <option value="anticipo">Anticipo</option>
+                                       <option value="pendiente">Pendiente</option>
+                                       <option value="extra">Extra</option>
+                                    </select>
+                                 </div>
+                                 <div>
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase">Método</label>
+                                    <select
+                                       value={nuevoPago.metodo}
+                                       onChange={(e) => setNuevoPago({ ...nuevoPago, metodo: e.target.value })}
+                                       className="mt-1 w-full rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                    >
+                                       <option value="efectivo">Efectivo</option>
+                                       <option value="tarjeta">Tarjeta</option>
+                                    </select>
+                                 </div>
+                                 <div>
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase">Monto</label>
+                                    <input
+                                       type="number"
+                                       value={nuevoPago.monto}
+                                       onChange={(e) => setNuevoPago({ ...nuevoPago, monto: e.target.value })}
+                                       placeholder="Monto"
+                                       className="mt-1 w-full rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                    />
+                                 </div>
+                                 <div>
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase">Fecha de Pago</label>
+                                    <input
+                                       type="date"
+                                       value={nuevoPago.fecha_pago}
+                                       onChange={(e) => setNuevoPago({ ...nuevoPago, fecha_pago: e.target.value })}
+                                       className="mt-1 w-full rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                                    />
+                                 </div>
+                                 <div>
+                                    <button
+                                       type="button"
+                                       onClick={handleAgregarPago}
+                                       className="w-full rounded-full bg-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-pink-700"
+                                    >
+                                       Agregar Pago
+                                    </button>
+                                 </div>
+                              </div>
                            </div>
                         </div>
                      </div>
-
-                     <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
-                        <h3 className="mb-4 text-base font-semibold text-gray-900">{selectedProduct ? `Pendiente $${Number(selectedProduct.precio_renta) - Number(ventasForm.anticipoEfectivo || 0) - Number(ventasForm.anticipoTarjeta || 0) - Number(ventasForm.pendienteEfectivo || 0) - Number(ventasForm.pendienteTarjeta || 0)}` : 'Pendiente'}</h3>
-                        <div className="space-y-4">
-                           <div>
-                              <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
-                              <input
-                                 type="number"
-                                 name="pendienteEfectivo"
-                                 value={ventasForm.pendienteEfectivo}
-                                 onChange={handleVentasChange}
-                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                              />
-                           </div>
-                           <div>
-                              <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
-                              <input
-                                 type="number"
-                                 name="pendienteTarjeta"
-                                 value={ventasForm.pendienteTarjeta}
-                                 onChange={handleVentasChange}
-                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                              />
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="rounded-[28px] border border-gray-200 bg-gray-50 p-5">
-                        <h3 className="mb-4 text-base font-semibold text-gray-900">Extra</h3>
-                        <div className="space-y-4">
-                           <div>
-                              <label className="block text-sm font-semibold text-gray-600">Efectivo</label>
-                              <input
-                                 type="number"
-                                 name="extraEfectivo"
-                                 value={ventasForm.extraEfectivo}
-                                 onChange={handleVentasChange}
-                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                              />
-                           </div>
-                           <div>
-                              <label className="block text-sm font-semibold text-gray-600">Tarjeta</label>
-                              <input
-                                 type="number"
-                                 name="extraTarjeta"
-                                 value={ventasForm.extraTarjeta}
-                                 onChange={handleVentasChange}
-                                 className="mt-2 w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
-                              />
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="flex items-center justify-center rounded-[28px] border border-gray-200 bg-gray-50 p-5">
-                        <label className="flex items-center gap-3 rounded-3xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
-                           <input
-                              type="checkbox"
-                              name="liquidado"
-                              checked={ventasForm.liquidado}
-                              onChange={handleVentasChange}
-                              className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-                           />
-                           Liquidado
-                        </label>
-                     </div>
-                  </div>
+                  )}
                </div>
 
                <div className="flex flex-col gap-4 sm:flex-row">
@@ -792,13 +1045,6 @@ export default function VentasForm() {
                      className="inline-flex w-full items-center justify-center rounded-full bg-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
                   >
                      {editandoFlag ? 'Guardar Cambios' : 'Registrar Renta'}
-                  </button>
-                  <button
-                     type="button"
-                     onClick={() => handleEnviarRecibo(ventasForm)}
-                     className="inline-flex w-full items-center justify-center rounded-full border border-pink-600 bg-white px-6 py-3 text-sm font-semibold text-pink-700 transition hover:bg-pink-50 sm:w-auto"
-                  >
-                     Generar Recibo
                   </button>
                </div>
             </form>
