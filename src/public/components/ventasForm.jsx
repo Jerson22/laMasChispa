@@ -915,13 +915,13 @@ export default function VentasForm() {
                            <div className="rounded-2xl border border-pink-100 bg-pink-50/50 p-4 text-center">
                               <p className="text-xs font-semibold text-pink-600 uppercase">Total Pagado</p>
                               <p className="text-xl font-bold text-pink-700">
-                                 ${pagos.reduce((acc, curr) => acc + Number(curr.monto), 0)}
+                                 ${Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0) + Number(ventasForm.pendienteEfectivo || 0) + Number(ventasForm.pendienteTarjeta || 0)}
                               </p>
                            </div>
                            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center">
                               <p className="text-xs font-semibold text-gray-500 uppercase">Pendiente</p>
                               <p className="text-xl font-bold text-red-600">
-                                 ${selectedProduct ? Math.max(0, Number(selectedProduct.precio_renta) - pagos.filter(p => p.categoria.includes('anticipo') || p.categoria.includes('pendiente')).reduce((acc, curr) => acc + Number(curr.monto), 0)) : '0'}
+                                 ${selectedProduct ? Math.max(0, Number(selectedProduct.precio_renta) - (Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0) + Number(ventasForm.pendienteEfectivo || 0) + Number(ventasForm.pendienteTarjeta || 0))) : '0'}
                               </p>
                            </div>
                            <div className="flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 p-4">

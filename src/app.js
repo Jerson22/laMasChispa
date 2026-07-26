@@ -507,7 +507,7 @@ app.put('/api/rentas/:id', verificarToken, esAdmin, async (req, res) => {
    const { estado } = req.body;     // Captura el nuevo estado enviado desde React
 
    // 1. Validación básica (opcional pero recomendada)
-   const estadosValidos = ['cita de ajustes', 'ajustes', 'planchado', 'entregado', 'devolucion', 'tintoreria', 'en tienda'];
+   const estadosValidos = ['cita de ajustes', 'ajustes', 'planchado', 'entregado', 'devuelto', 'devolucion', 'tintoreria', 'en tienda'];
    if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ error: 'Estado no válido' });
    }

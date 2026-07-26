@@ -207,22 +207,6 @@ export default function Dinero() {
             </div>
          </div>
 
-         {/* Desglose por concepto (Visibles en pantalla e impresión) */}
-         <div className="grid gap-4 grid-cols-1 md:grid-cols-3 print:grid-cols-3 mb-8">
-            <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 flex justify-between items-center shadow-xs">
-               <span className="text-xs font-semibold text-gray-500 uppercase">Anticipos</span>
-               <span className="text-base font-bold text-gray-800">${totalAnticipos.toFixed(2)}</span>
-            </div>
-            <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 flex justify-between items-center shadow-xs">
-               <span className="text-xs font-semibold text-gray-500 uppercase">Pendiente</span>
-               <span className="text-base font-bold text-gray-800">${totalPendientes.toFixed(2)}</span>
-            </div>
-            <div className="rounded-2xl border border-gray-100 bg-white px-5 py-4 flex justify-between items-center shadow-xs">
-               <span className="text-xs font-semibold text-gray-500 uppercase">Cargos Extras</span>
-               <span className="text-base font-bold text-gray-800">${totalExtras.toFixed(2)}</span>
-            </div>
-         </div>
-
          {/* Gráficos de Ingresos */}
          <div className="grid gap-6 md:grid-cols-2 mb-8 print:hidden">
             {/* Gráfico 1: Método de Pago */}

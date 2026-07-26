@@ -29,7 +29,8 @@ export default function Rentas() {
       tipoFecha: 'todas',
       preset: 'todos',
       fechaInicio: '',
-      fechaFin: ''
+      fechaFin: '',
+      soloPendientesLiquidar: false
    });
    const [searchQuery, setSearchQuery] = useState('');
    const [showFiltersMobile, setShowFiltersMobile] = useState(false);
@@ -72,6 +73,11 @@ export default function Rentas() {
             if (!matchName && !matchProduct) return false;
          }
 
+         if (filtros.soloPendientesLiquidar) {
+            const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
+            if (esLiquidado) return false;
+         }
+
          if (filtros.tipoFecha !== 'todas' && !renta[filtros.tipoFecha]) {
             return false;
          }
@@ -94,6 +100,14 @@ export default function Rentas() {
                return stringRenta === stringHoy;
             }
 
+            // Filtro: Mañana
+            if (filtros.preset === 'manana') {
+               const manana = new Date(hoy);
+               manana.setDate(manana.getDate() + 1);
+               const stringManana = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, '0')}-${String(manana.getDate()).padStart(2, '0')}`;
+               return stringRenta === stringManana;
+            }
+
             // Para rangos estables creamos objetos Date locales a mediodía
             const [rYear, rMonth, rDay] = stringRenta.split('-').map(Number);
             const fRentaComparar = new Date(rYear, rMonth - 1, rDay, 12, 0, 0);
@@ -112,6 +126,22 @@ export default function Rentas() {
                domingo.setHours(23, 59, 59, 999);
 
                return fRentaComparar >= lunes && fRentaComparar <= domingo;
+            }
+
+            // Filtro: Siguiente Semana
+            if (filtros.preset === 'siguienteSemana') {
+               const tempHoy = new Date();
+               tempHoy.setHours(0, 0, 0, 0);
+
+               const diaSemana = tempHoy.getDay();
+               const diferenciaLunes = tempHoy.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1) + 7;
+               const lunesSig = new Date(tempHoy.getFullYear(), tempHoy.getMonth(), diferenciaLunes, 0, 0, 0);
+
+               const domingoSig = new Date(lunesSig);
+               domingoSig.setDate(lunesSig.getDate() + 6);
+               domingoSig.setHours(23, 59, 59, 999);
+
+               return fRentaComparar >= lunesSig && fRentaComparar <= domingoSig;
             }
 
             // Filtro: Rango Personalizado
@@ -167,6 +197,9 @@ export default function Rentas() {
                )
             );
             alert(`Renta ${rentaId} actualizada a: ${nuevoEstado}`);
+         } else {
+            const errData = await response.json();
+            alert(errData.error || 'Error al actualizar el estado de la renta');
          }
       } catch (error) {
          console.error('Error en la conexión:', error);
@@ -228,7 +261,8 @@ export default function Rentas() {
          tipoFecha: 'todas',
          preset: 'todos',
          fechaInicio: '',
-         fechaFin: ''
+         fechaFin: '',
+         soloPendientesLiquidar: false
       });
    };
 
@@ -278,7 +312,9 @@ export default function Rentas() {
                >
                   <option value="todos">Ver Todas</option>
                   <option value="hoy">Hoy</option>
+                  <option value="manana">Mañana</option>
                   <option value="semana">Esta Semana</option>
+                  <option value="siguienteSemana">Siguiente Semana</option>
                   <option value="personalizado">Rango Personalizado 📅</option>
                </select>
             </div>
@@ -305,6 +341,20 @@ export default function Rentas() {
                   </div>
                </div>
             )}
+
+            <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-col gap-2`}>
+               <label className="text-sm font-semibold text-gray-500 hidden sm:block opacity-0 select-none">Filtro</label>
+               <label className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-inner cursor-pointer hover:border-pink-300 transition h-[38px]">
+                  <input
+                     type="checkbox"
+                     checked={filtros.soloPendientesLiquidar}
+                     onChange={(e) => setFiltros({ ...filtros, soloPendientesLiquidar: e.target.checked })}
+                     className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500 cursor-pointer"
+                  />
+                  <span>Por Liquidar</span>
+               </label>
+            </div>
+
             <button
                className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex w-full sm:w-auto h-[38px] items-center justify-center gap-2 rounded-xl bg-pink-100 px-4 py-2 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-200 shadow-sm`}
                onClick={clearFilters}
