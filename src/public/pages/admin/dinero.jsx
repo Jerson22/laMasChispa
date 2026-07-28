@@ -8,6 +8,13 @@ const obtenerFechaLocalYMD = () => {
    return localDate.toISOString().split('T')[0];
 };
 
+const formatearMoneda = (monto, decimales = 2) => {
+   return Number(monto || 0).toLocaleString('en-US', {
+      minimumFractionDigits: decimales,
+      maximumFractionDigits: decimales
+   });
+};
+
 export default function Dinero() {
    const obtenerPrimerDiaMes = () => {
       const d = new Date();
@@ -186,21 +193,21 @@ export default function Dinero() {
          <div className="grid gap-6 grid-cols-1 md:grid-cols-3 print:grid-cols-3 mb-8">
             <div className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total en Efectivo</p>
-               <p className="mt-2 text-3xl font-extrabold text-gray-800">${totalEfectivo.toFixed(2)}</p>
+               <p className="mt-2 text-3xl font-extrabold text-gray-800">${formatearMoneda(totalEfectivo)}</p>
                <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
                   <span>Dinero físico en caja</span>
                </div>
             </div>
             <div className="rounded-[28px] border border-pink-100 bg-pink-50/20 p-6 shadow-sm">
                <p className="text-xs font-bold text-pink-600 uppercase tracking-wider">Total en Tarjeta</p>
-               <p className="mt-2 text-3xl font-extrabold text-pink-700">${totalTarjeta.toFixed(2)}</p>
+               <p className="mt-2 text-3xl font-extrabold text-pink-700">${formatearMoneda(totalTarjeta)}</p>
                <div className="mt-3 flex items-center gap-2 text-xs text-pink-400">
                   <span>Transferencias y terminal</span>
                </div>
             </div>
             <div className="rounded-[28px] border border-gray-200 bg-gradient-to-br from-pink-600 to-pink-700 p-6 text-white shadow-md">
                <p className="text-xs font-bold text-pink-100 uppercase tracking-wider">Total Recaudado</p>
-               <p className="mt-2 text-3xl font-black">${totalRecaudado.toFixed(2)}</p>
+               <p className="mt-2 text-3xl font-black">${formatearMoneda(totalRecaudado)}</p>
                <div className="mt-3 flex items-center gap-2 text-xs text-pink-200">
                   <span>Suma total de abonos en el período</span>
                </div>
@@ -245,7 +252,7 @@ export default function Dinero() {
                               {hoveredMetodo}
                            </span>
                            <span className="text-sm font-black text-gray-800">
-                              ${hoveredMetodo === 'efectivo' ? totalEfectivo.toFixed(0) : totalTarjeta.toFixed(0)}
+                              ${hoveredMetodo === 'efectivo' ? formatearMoneda(totalEfectivo, 0) : formatearMoneda(totalTarjeta, 0)}
                            </span>
                         </>
                      ) : (
@@ -270,7 +277,7 @@ export default function Dinero() {
                         <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                         <span className="text-gray-600 font-medium">Efectivo</span>
                      </div>
-                     <span className="font-bold text-gray-800">${totalEfectivo.toFixed(2)} ({pctEfectivo.toFixed(0)}%)</span>
+                     <span className="font-bold text-gray-800">${formatearMoneda(totalEfectivo)} ({pctEfectivo.toFixed(0)}%)</span>
                   </div>
                   <div 
                      onMouseEnter={() => setHoveredMetodo('tarjeta')}
@@ -283,7 +290,7 @@ export default function Dinero() {
                         <span className="w-3 h-3 rounded-full bg-pink-600"></span>
                         <span className="text-gray-600 font-medium">Tarjeta</span>
                      </div>
-                     <span className="font-bold text-gray-800">${totalTarjeta.toFixed(2)} ({pctTarjeta.toFixed(0)}%)</span>
+                     <span className="font-bold text-gray-800">${formatearMoneda(totalTarjeta)} ({pctTarjeta.toFixed(0)}%)</span>
                   </div>
                </div>
             </div>
@@ -332,9 +339,9 @@ export default function Dinero() {
                               {hoveredConcepto === 'extra' ? 'cargo extra' : hoveredConcepto}
                            </span>
                            <span className="text-sm font-black text-gray-800">
-                              ${hoveredConcepto === 'anticipo' ? totalAnticipos.toFixed(0) :
-                                hoveredConcepto === 'pendiente' ? totalPendientes.toFixed(0) :
-                                totalExtras.toFixed(0)}
+                              ${hoveredConcepto === 'anticipo' ? formatearMoneda(totalAnticipos, 0) :
+                                hoveredConcepto === 'pendiente' ? formatearMoneda(totalPendientes, 0) :
+                                formatearMoneda(totalExtras, 0)}
                            </span>
                         </>
                      ) : (
@@ -359,7 +366,7 @@ export default function Dinero() {
                         <span className="w-3 h-3 rounded-full bg-pink-600"></span>
                         <span className="text-gray-600 font-medium">Anticipos</span>
                      </div>
-                     <span className="font-bold text-gray-800">${totalAnticipos.toFixed(2)} ({pctAnticipo.toFixed(0)}%)</span>
+                     <span className="font-bold text-gray-800">${formatearMoneda(totalAnticipos)} ({pctAnticipo.toFixed(0)}%)</span>
                   </div>
                   <div 
                      onMouseEnter={() => setHoveredConcepto('pendiente')}
@@ -372,7 +379,7 @@ export default function Dinero() {
                         <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
                         <span className="text-gray-600 font-medium">Pendientes</span>
                      </div>
-                     <span className="font-bold text-gray-800">${totalPendientes.toFixed(2)} ({pctPendiente.toFixed(0)}%)</span>
+                     <span className="font-bold text-gray-800">${formatearMoneda(totalPendientes)} ({pctPendiente.toFixed(0)}%)</span>
                   </div>
                   <div 
                      onMouseEnter={() => setHoveredConcepto('extra')}
@@ -385,7 +392,7 @@ export default function Dinero() {
                         <span className="w-3 h-3 rounded-full bg-amber-500"></span>
                         <span className="text-gray-600 font-medium">Extras</span>
                      </div>
-                     <span className="font-bold text-gray-800">${totalExtras.toFixed(2)} ({pctExtra.toFixed(0)}%)</span>
+                     <span className="font-bold text-gray-800">${formatearMoneda(totalExtras)} ({pctExtra.toFixed(0)}%)</span>
                   </div>
                </div>
             </div>
@@ -434,7 +441,7 @@ export default function Dinero() {
                                     </span>
                                  </td>
                                  <td className="py-4 px-6 print:py-2 print:px-3 print:text-xs capitalize">{r.metodo}</td>
-                                 <td className="py-4 px-6 print:py-2 print:px-3 print:text-xs text-right font-bold text-gray-900">${Number(r.monto).toFixed(2)}</td>
+                                 <td className="py-4 px-6 print:py-2 print:px-3 print:text-xs text-right font-bold text-gray-900">${formatearMoneda(r.monto)}</td>
                               </tr>
                            ))}
                         </tbody>
@@ -450,7 +457,7 @@ export default function Dinero() {
                                  {new Date(r.fecha_pago).toISOString().split('T')[0]}
                               </span>
                               <span className="text-base font-bold text-pink-600">
-                                 ${Number(r.monto).toFixed(2)}
+                                 ${formatearMoneda(r.monto)}
                               </span>
                            </div>
                            
