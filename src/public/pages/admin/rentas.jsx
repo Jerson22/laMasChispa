@@ -511,6 +511,7 @@ export default function Rentas() {
                                  <option value="devuelto">Devuelto</option>
                                  <option value="tintoreria">Tintorería</option>
                                  <option value="en tienda">En tienda</option>
+                                 <option value="cancelada">Cancelada</option>
                               </select>
                            </td>
                            <td className="px-4 py-4 text-sm text-gray-700">{formatearFechaSafe(renta.fechaDevolucion, opciones)}</td>

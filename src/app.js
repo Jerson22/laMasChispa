@@ -63,7 +63,7 @@ async function inicializarBaseDatos() {
       if (count === 0) {
          console.log('🔄 Ejecutando migración inicial de pagos históricos...');
          const ventas = await db.query('SELECT id, "fechaRenta", "fechaEntrega", "fechaDevolucion", "anticipoEfectivo", "anticipoTarjeta", "pendienteEfectivo", "pendienteTarjeta", "extraEfectivo", "extraTarjeta" FROM public.ventas');
-         
+
          const formatearFecha = (fRaw) => {
             if (!fRaw) return new Date().toISOString().split('T')[0];
             if (fRaw instanceof Date) return fRaw.toISOString().split('T')[0];
@@ -507,7 +507,7 @@ app.put('/api/rentas/:id', verificarToken, esAdmin, async (req, res) => {
    const { estado } = req.body;     // Captura el nuevo estado enviado desde React
 
    // 1. Validación básica (opcional pero recomendada)
-   const estadosValidos = ['cita de ajustes', 'ajustes', 'planchado', 'entregado', 'devuelto', 'devolucion', 'tintoreria', 'en tienda'];
+   const estadosValidos = ['cita de ajustes', 'ajustes', 'planchado', 'entregado', 'devuelto', 'devolucion', 'tintoreria', 'en tienda', 'cancelada'];
    if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ error: 'Estado no válido' });
    }
@@ -546,7 +546,7 @@ app.put('/api/rentas/:id', verificarToken, esAdmin, async (req, res) => {
 // Función auxiliar para sincronizar acumulados de pagos en la tabla ventas
 async function syncVentaPagos(ventaId) {
    const pagosRes = await db.query('SELECT categoria, metodo, monto FROM pagos_renta WHERE venta_id = $1', [ventaId]);
-   
+
    let anticipoEfectivo = 0;
    let anticipoTarjeta = 0;
    let pendienteEfectivo = 0;
@@ -580,10 +580,10 @@ async function syncVentaPagos(ventaId) {
 function agruparPagos(pagos) {
    const grupos = {};
    for (const p of pagos) {
-      const fecha = p.fecha_pago instanceof Date 
-         ? p.fecha_pago.toISOString().split('T')[0] 
+      const fecha = p.fecha_pago instanceof Date
+         ? p.fecha_pago.toISOString().split('T')[0]
          : String(p.fecha_pago).split('T')[0];
-      
+
       const key = `${p.venta_id || ''}_${fecha}_${p.metodo}`;
       if (!grupos[key]) {
          grupos[key] = [];
@@ -600,11 +600,11 @@ function agruparPagos(pagos) {
 
       if (anticipos.length > 0 && pendientes.length > 0) {
          // Grupo 1: Anticipo + Extras
-         const montoA = anticipos.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0) + 
-                        extras.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0);
+         const montoA = anticipos.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0) +
+            extras.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0);
          const idsA = [...anticipos, ...extras].map(x => x.id).join(',');
          const catsA = ['anticipo', ...extras.map(() => 'extra')].filter((v, i, a) => a.indexOf(v) === i).join(', ');
-         
+
          resultado.push({
             ...anticipos[0],
             monto: montoA,
@@ -615,7 +615,7 @@ function agruparPagos(pagos) {
          // Grupo 2: Pendiente
          const montoP = pendientes.reduce((acc, c) => acc + parseFloat(c.monto || 0), 0);
          const idsP = pendientes.map(x => x.id).join(',');
-         
+
          resultado.push({
             ...pendientes[0],
             monto: montoP,
@@ -654,7 +654,7 @@ app.get('/api/ventas/:id/pagos', verificarToken, esAdmin, async (req, res) => {
 app.post('/api/ventas/:id/pagos', verificarToken, esAdmin, async (req, res) => {
    const { id } = req.params;
    const { categoria, metodo, monto, fecha_pago } = req.body;
-   
+
    if (!categoria || !metodo || isNaN(parseFloat(monto)) || parseFloat(monto) <= 0) {
       return res.status(400).json({ error: 'Datos de pago inválidos o incompletos' });
    }
@@ -664,7 +664,7 @@ app.post('/api/ventas/:id/pagos', verificarToken, esAdmin, async (req, res) => {
          'INSERT INTO pagos_renta (venta_id, categoria, metodo, monto, fecha_pago) VALUES ($1, $2, $3, $4, $5)',
          [id, categoria, metodo, parseFloat(monto), fecha_pago || new Date().toISOString().split('T')[0]]
       );
-      
+
       await syncVentaPagos(id);
       res.status(201).json({ mensaje: 'Pago registrado y sincronizado con éxito' });
    } catch (error) {
@@ -712,7 +712,7 @@ app.get('/api/ingresos/reporte', verificarToken, esAdmin, async (req, res) => {
       `;
       const params = [];
       let whereClauses = [];
-      
+
       if (desde) {
          params.push(desde);
          whereClauses.push(`pr.fecha_pago >= $${params.length}`);
