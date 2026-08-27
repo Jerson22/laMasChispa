@@ -72,7 +72,7 @@ const NewClient = () => {
          parsedUser = null;
       }
 
-      if (!token || !parsedUser || parsedUser.rol !== 'admin') {
+      if (!token || !parsedUser || (parsedUser.rol !== 'admin' && parsedUser.rol !== 'chispa1')) {
          clearSession();
          return;
       }

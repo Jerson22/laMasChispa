@@ -15,9 +15,9 @@ const verificarToken = (req, res, next) => {
    }
 };
 
-// Middleware para verificar si es Admin
+// Middleware para verificar si es Admin o Chispa1
 const esAdmin = (req, res, next) => {
-   if (req.user.rol !== 'admin') {
+   if (req.user.rol !== 'admin' && req.user.rol !== 'chispa1') {
       return res.status(403).json({ error: 'Acceso denegado. Se requiere rol de Admin.' });
    }
    next();

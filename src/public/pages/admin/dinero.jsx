@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AiOutlineDownload, AiOutlinePrinter } from "react-icons/ai";
 
 const obtenerFechaLocalYMD = () => {
@@ -16,6 +17,19 @@ const formatearMoneda = (monto, decimales = 2) => {
 };
 
 export default function Dinero() {
+   const navigate = useNavigate();
+
+   useEffect(() => {
+      const user = localStorage.getItem('user');
+      try {
+         const parsed = user ? JSON.parse(user) : null;
+         if (parsed?.rol === 'chispa1') {
+            navigate('/admin');
+         }
+      } catch (err) {
+         console.error(err);
+      }
+   }, [navigate]);
    const obtenerPrimerDiaMes = () => {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;

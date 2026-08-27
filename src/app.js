@@ -694,6 +694,9 @@ app.delete('/api/pagos/:ids', verificarToken, esAdmin, async (req, res) => {
 
 // Endpoint para Reportes Contables (Agrupado por día, método y renta)
 app.get('/api/ingresos/reporte', verificarToken, esAdmin, async (req, res) => {
+   if (req.user.rol !== 'admin') {
+      return res.status(403).json({ error: 'Acceso denegado. Solo el Admin puede ver reportes de ingresos.' });
+   }
    const { desde, hasta } = req.query;
    try {
       let query = `

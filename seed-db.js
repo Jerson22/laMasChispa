@@ -1,5 +1,5 @@
-const db = require('./src/db/connection');
-const bcrypt = require('bcryptjs');
+import db from './src/db/connection.js';
+import bcrypt from 'bcryptjs';
 
 async function seed() {
   try {
@@ -14,10 +14,17 @@ async function seed() {
       ['Admin', 'admin@example.com', hashedPassword, 'admin']
     );
 
-    await db.query(`INSERT INTO clientes (id, nombre, telefono, email, direccion) VALUES
-      (1, 'Ana Pérez', '555-1111', 'ana@ejemplo.com', 'Calle Luna 123'),
-      (2, 'María López', '555-2222', 'maria@ejemplo.com', 'Avenida Sol 45'),
-      (3, 'Laura Torres', '555-3333', 'laura@ejemplo.com', 'Plaza Estrella 9')
+    // Crear usuario chispa1
+    const hashedPasswordChispa = await bcrypt.hash('redvelvet', salt);
+    await db.query(
+      'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING',
+      ['chispa1', 'chispa1@chispa.com', hashedPasswordChispa, 'chispa1']
+    );
+
+    await db.query(`INSERT INTO clientes (id, nombre, telefono, email) VALUES
+      (1, 'Ana Pérez', '555-1111', 'ana@ejemplo.com'),
+      (2, 'María López', '555-2222', 'maria@ejemplo.com'),
+      (3, 'Laura Torres', '555-3333', 'laura@ejemplo.com')
       ON CONFLICT (id) DO NOTHING
     `);
 

@@ -8,6 +8,14 @@ export default function AdminLayout() {
    const navigate = useNavigate();
    const token = localStorage.getItem('token');
 
+   const storedUser = localStorage.getItem('user');
+   let parsedUser = null;
+   try {
+      parsedUser = storedUser ? JSON.parse(storedUser) : null;
+   } catch {
+      parsedUser = null;
+   }
+
    const clearSession = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -33,15 +41,7 @@ export default function AdminLayout() {
    };
 
    useEffect(() => {
-      const storedUser = localStorage.getItem('user');
-      let parsedUser = null;
-      try {
-         parsedUser = storedUser ? JSON.parse(storedUser) : null;
-      } catch {
-         parsedUser = null;
-      }
-
-      if (!token || !parsedUser || parsedUser.rol !== 'admin') {
+      if (!token || !parsedUser || (parsedUser.rol !== 'admin' && parsedUser.rol !== 'chispa1')) {
          clearSession();
          return;
       }
@@ -79,7 +79,9 @@ export default function AdminLayout() {
                <NavLink to="/admin/rentas" className={desktopLinkStyles}>Rentas</NavLink>
                <NavLink to="/admin/nuevo-cliente" className={desktopLinkStyles}>Nuevo Cliente</NavLink>
                <NavLink to="/admin/inventario" className={desktopLinkStyles}>Inventario</NavLink>
-               <NavLink to="/admin/dinero" className={desktopLinkStyles}>Dinero</NavLink>
+               {parsedUser?.rol !== 'chispa1' && (
+                  <NavLink to="/admin/dinero" className={desktopLinkStyles}>Dinero</NavLink>
+               )}
 
                <button
                   onClick={clearSession}
@@ -120,10 +122,12 @@ export default function AdminLayout() {
                <span>Inventario</span>
             </NavLink>
 
-            <NavLink to="/admin/dinero" className={mobileLinkStyles}>
-               <MdAttachMoney className="text-lg mb-0.5" />
-               <span>Dinero</span>
-            </NavLink>
+            {parsedUser?.rol !== 'chispa1' && (
+               <NavLink to="/admin/dinero" className={mobileLinkStyles}>
+                  <MdAttachMoney className="text-lg mb-0.5" />
+                  <span>Dinero</span>
+               </NavLink>
+            )}
 
             {/* Puedes seguir agregando más NavLinks aquí y se podrán ver arrastrando el dedo */}
 

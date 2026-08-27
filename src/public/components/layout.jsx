@@ -16,7 +16,7 @@ export default function Layout() {
       setIsLoggedIn(!!token);
       try {
          const parsed = user ? JSON.parse(user) : null;
-         setIsAdmin(parsed?.rol === 'admin');
+         setIsAdmin(parsed?.rol === 'admin' || parsed?.rol === 'chispa1');
       } catch {
          setIsAdmin(false);
       }
