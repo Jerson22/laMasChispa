@@ -1,15 +1,23 @@
 @import "tailwindcss";
 @source ".";
 
-html, body {
+html,
+body {
    overflow-x: clip;
 }
 
 body {
-   background-color: #f9a8d4;
+   background-color: #ffffff;
    margin: 0;
    font-family: "Poppins", sans-serif;
 }
+
+/* ===== FUENTES PERSONALIZADAS ===== */
+.font-montserrat { font-family: 'Montserrat', serif !important; }
+.font-poppins { font-family: 'Poppins', sans-serif !important; }
+.font-caveat { font-family: 'Caveat', cursive !important; }
+.font-pinyon { font-family: 'Pinyon Script', cursive !important; }
+.font-bodoni { font-family: 'Bodoni Moda', serif !important; }
 
 /* ===== NAVBAR ===== */
 .navbar {
@@ -46,7 +54,6 @@ body {
 
 .nav-right {
    display: flex;
-   gap: 40px;
 }
 
 .nav-right a {
@@ -63,12 +70,33 @@ body {
 }
 
 .fa-icon {
-   color: #777777;
    font-size: 1.5rem;
 }
 
 .fa-icon:hover {
    color: #000000;
+}
+
+.social-icon {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   width: 36px;
+   height: 36px;
+   background-color: #e83d9c;
+   border-radius: 50%;
+   color: #ffffff;
+   transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.social-icon:hover {
+   background-color: #be185d;
+   transform: scale(1.08);
+}
+
+.social-icon svg {
+   color: #ffffff !important;
+   font-size: 1.1rem;
 }
 
 /* ===== MENÚ HAMBURGUESA (solo visible en móvil) ===== */
@@ -147,46 +175,62 @@ body {
 .filtro-select:focus {
    border-color: #db2777;
 }
+
 /* Añadimos .filtros-container antes para darle más fuerza al selector (especificidad) */
 .filtros-container .filtro-btn {
    /* 🎨 IGUALANDO A LOS SELECTORES */
-   background: white !important;      /* Mismo fondo blanco que los select */
-   border: 1px solid #e5e7eb;         /* Cambiado el borde negro por el gris claro de los select */
-   border-radius: 10px;               /* Cambiado de 8px a 10px para que tenga el mismo redondeado */
-   color: #be185d;                    /* Mantiene el color rosa para tu icono */
+   background: white !important;
+   /* Mismo fondo blanco que los select */
+   border: 1px solid #e5e7eb;
+   /* Cambiado el borde negro por el gris claro de los select */
+   border-radius: 10px;
+   /* Cambiado de 8px a 10px para que tenga el mismo redondeado */
+   color: #be185d;
+   /* Mantiene el color rosa para tu icono */
 
    /* Centrado perfecto del icono y el texto */
    display: inline-flex;
    align-items: center;
    justify-content: center;
-   gap: 8px;                          /* Separación entre icono y texto */
-   
+   gap: 8px;
+   /* Separación entre icono y texto */
+
    /* 🛠️ CORRECCIÓN DE TAMAÑO (Para que quepa el texto) */
-   width: auto;                       /* Cambiado de 43px a auto para que se estire con el texto */
-   height: 43px;                      /* Se queda en 43px para nivelarse milimétricamente con el alto del select */
-   padding: 0 16px;                   /* Añadimos espacio acolchado a los lados para que el texto respire */
-   
+   width: auto;
+   /* Cambiado de 43px a auto para que se estire con el texto */
+   height: 43px;
+   /* Se queda en 43px para nivelarse milimétricamente con el alto del select */
+   padding: 0 16px;
+   /* Añadimos espacio acolchado a los lados para que el texto respire */
+
    cursor: pointer;
-   box-sizing: border-box;            /* Evita que el borde altere el tamaño */
+   box-sizing: border-box;
+   /* Evita que el borde altere el tamaño */
    transition: all 0.2s ease;
 }
 
 /* 🔍 CONTROL DEL TAMAÑO DEL ICONO INDEPENDIENTE */
 .filtros-container .filtro-btn svg {
-   font-size: 1.35rem;                /* El icono se queda grande y estilizado */
+   font-size: 1.35rem;
+   /* El icono se queda grande y estilizado */
 }
 
 /* 🔍 CONTROL DEL TAMAÑO DE LAS LETRAS */
 .filtros-container .filtro-btn span {
-   font-size: 0.9rem;                 /* Un tamaño de letra balanceado y elegante para "Limpiar" */
-   font-weight: 600;                  /* Letras semi-negritas para que combinen con la interfaz */
+   font-size: 0.9rem;
+   /* Un tamaño de letra balanceado y elegante para "Limpiar" */
+   font-weight: 600;
+   /* Letras semi-negritas para que combinen con la interfaz */
 }
 
 /* Efecto Hover interactivo que combina con tus enfoques (focus) */
 .filtros-container .filtro-btn:hover {
-   background: #fdf2f8 !important;    /* Un fondo rosa súper sutil al pasar el mouse */
-   border-color: #db2777;             /* El borde se vuelve rosa brillante como tus inputs al hacer focus */
+   background: #fdf2f8 !important;
+   /* Un fondo rosa súper sutil al pasar el mouse */
+   border-color: #db2777;
+   /* El borde se vuelve rosa brillante como tus inputs al hacer focus */
 }
+
 .vestidos-grid {
    display: grid;
    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -420,9 +464,9 @@ body {
    max-width: 800px;
    margin: 40px auto;
    padding: 40px;
-   border: 3px solid white;
+   
    border-radius: 30px;
-   background-color: rgba(255, 255, 255, 0.1);
+   
    /* backdrop-filter: blur(10px); */
    text-align: center;
 }
@@ -436,10 +480,6 @@ body {
 }
 
 .home-container p {
-   font-family:"Poppins", sans-serif;
-   font-size: 1.5rem;
-   color: #333;
-   line-height: 1.6;
 }
 
 /* ===== PRODUCTO DETAIL ===== */

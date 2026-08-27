@@ -7,6 +7,9 @@ import Vestidos from "./pages/Vestidos"
 import Login from "./pages/Login"
 import Accesorios from "./pages/accesorios"
 import Producto from "./pages/producto"
+import Contacto from "./pages/Contacto"
+import Talla from "./pages/Talla"
+import Preguntas from "./pages/Preguntas"
 // import Rentas from "./pages/Rentas"
 //pagina de administrador
 import Admin from "./pages/Admin"
@@ -29,6 +32,9 @@ export default function App() {
                <Route path="/login" element={<Login />} />
                {/* <Route path="/rentas" element={<Rentas />} /> */}
                <Route path="/producto/:id" element={<Producto />} />
+               <Route path="/contacto" element={<Contacto />} />
+               <Route path="/talla" element={<Talla />} />
+               <Route path="/preguntas" element={<Preguntas />} />
                {/* <Route path="/admin" element={<Admin />} /> */}
                {/* SUBRUTAS DE ADMIN: Ahora son hijas de Layout también */}
                {/* Al estar aquí dentro, conservan la Navbar del público */}
