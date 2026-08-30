@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams, useLocation } from 'react-router-dom';
 
 const obtenerFechaLocalYMD = () => {
    const d = new Date();
@@ -10,6 +10,7 @@ const obtenerFechaLocalYMD = () => {
 
 export default function VentasForm() {
    const { id } = useParams();
+   const location = useLocation();
    const [productos, setProductos] = useState([]);
    const [clientes, setClientes] = useState([]);
 
@@ -218,7 +219,18 @@ export default function VentasForm() {
       fetchPagos();
    }, [id, token]);
 
-   // Este se dispara cuando cambia el productId (que viene de la BD) o la lista de productos
+   // Si venimos de la página de un producto con ?productId=XX, preseleccionarlo
+   useEffect(() => {
+      if (!id) {
+         const searchParams = new URLSearchParams(location.search);
+         const paramProductId = searchParams.get('productId') || location.state?.productId;
+         if (paramProductId) {
+            setVentasForm(prev => ({ ...prev, productId: Number(paramProductId) }));
+         }
+      }
+   }, [id, location.search, location.state]);
+
+   // Este se dispara cuando cambia el productId (que viene de la BD o parámetro) o la lista de productos
    useEffect(() => {
       if (ventasForm.productId && productos.length > 0) {
          const p = productos.find(prod => prod.id === Number(ventasForm.productId));

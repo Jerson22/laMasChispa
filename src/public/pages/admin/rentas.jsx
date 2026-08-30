@@ -30,7 +30,8 @@ export default function Rentas() {
       preset: 'todos',
       fechaInicio: '',
       fechaFin: '',
-      soloPendientesLiquidar: false
+      soloPendientesLiquidar: false,
+      estado: 'todos'
    });
    const [searchQuery, setSearchQuery] = useState('');
    const [showFiltersMobile, setShowFiltersMobile] = useState(false);
@@ -67,15 +68,20 @@ export default function Rentas() {
 
       const filtradas = rentas.filter((renta) => {
          if (searchQuery.trim() !== '') {
-            const searchLower = searchQuery.toLowerCase();
+            const searchLower = searchQuery.toLowerCase().trim();
+            const matchId = renta.id != null && String(renta.id).toLowerCase().includes(searchLower);
             const matchName = renta.name && renta.name.toLowerCase().includes(searchLower);
             const matchProduct = renta.producto_nombre && renta.producto_nombre.toLowerCase().includes(searchLower);
-            if (!matchName && !matchProduct) return false;
+            if (!matchId && !matchName && !matchProduct) return false;
          }
 
          if (filtros.soloPendientesLiquidar) {
             const esLiquidado = renta.liquidado === true || renta.liquidado === 1 || renta.liquidado === '1' || renta.liquidado === 'true';
             if (esLiquidado) return false;
+         }
+
+         if (filtros.estado && filtros.estado !== 'todos') {
+            if (renta.estado !== filtros.estado) return false;
          }
 
          if (filtros.tipoFecha !== 'todas' && !renta[filtros.tipoFecha]) {
@@ -111,6 +117,22 @@ export default function Rentas() {
             // Para rangos estables creamos objetos Date locales a mediodía
             const [rYear, rMonth, rDay] = stringRenta.split('-').map(Number);
             const fRentaComparar = new Date(rYear, rMonth - 1, rDay, 12, 0, 0);
+
+            // Filtro: Semana Pasada
+            if (filtros.preset === 'semanaPasada') {
+               const tempHoy = new Date();
+               tempHoy.setHours(0, 0, 0, 0);
+
+               const diaSemana = tempHoy.getDay();
+               const diferenciaLunes = tempHoy.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1) - 7;
+               const lunesPas = new Date(tempHoy.getFullYear(), tempHoy.getMonth(), diferenciaLunes, 0, 0, 0);
+
+               const domingoPas = new Date(lunesPas);
+               domingoPas.setDate(lunesPas.getDate() + 6);
+               domingoPas.setHours(23, 59, 59, 999);
+
+               return fRentaComparar >= lunesPas && fRentaComparar <= domingoPas;
+            }
 
             // Filtro: Esta Semana
             if (filtros.preset === 'semana') {
@@ -262,107 +284,131 @@ export default function Rentas() {
          preset: 'todos',
          fechaInicio: '',
          fechaFin: '',
-         soloPendientesLiquidar: false
+         soloPendientesLiquidar: false,
+         estado: 'todos'
       });
    };
 
    return (
-      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-5">
+          <div className="mb-5 flex flex-col gap-2.5 rounded-2xl border border-pink-100 bg-white/90 p-3.5 shadow-sm sm:flex-row sm:flex-wrap lg:flex-nowrap sm:items-end sm:gap-2.5 sm:p-4 overflow-x-auto">
+             <div className="flex flex-1 flex-col gap-1.5 w-full sm:w-auto min-w-[150px]">
+                <div className="flex items-center justify-between">
+                   <label className="text-xs font-semibold text-gray-500 truncate">Buscar por cliente, vestido o ID</label>
+                   <button
+                      className="text-xs font-semibold text-pink-600 sm:hidden"
+                      onClick={() => setShowFiltersMobile(!showFiltersMobile)}
+                   >
+                      {showFiltersMobile ? 'Ocultar' : 'Filtros'}
+                   </button>
+                </div>
+                <input
+                   type="text"
+                   placeholder="Ej. María, Sirena o #5..."
+                   className="w-full h-[38px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                />
+             </div>
+             
+             <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-1.5 min-w-[140px]`}>
+                <label className="text-xs font-semibold text-gray-500 truncate">¿Qué fecha revisar?</label>
+                <select
+                   className="w-full h-[38px] rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs sm:text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                   value={filtros.tipoFecha}
+                   onChange={(e) => setFiltros({ ...filtros, tipoFecha: e.target.value })}
+                >
+                   <option value="todas">Todas las fechas</option>
+                   <option value="fechaEntrega">Fecha de Entrega</option>
+                   <option value="fechaDevolucion">Fecha de Devolución</option>
+                   <option value="fechaAjuste">Fecha de Ajuste</option>
+                   <option value="fechaRenta">Fecha de Renta</option>
+                </select>
+             </div>
 
-         <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-pink-100 bg-white/90 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-6">
-            <div className="flex flex-1 flex-col gap-2 w-full sm:w-auto">
-               <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-gray-500">Buscar por cliente o vestido</label>
-                  <button
-                     className="text-xs font-semibold text-pink-600 sm:hidden"
-                     onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-                  >
-                     {showFiltersMobile ? 'Ocultar filtros' : 'Filtros de fecha'}
-                  </button>
-               </div>
-               <input
-                  type="text"
-                  placeholder="Ej. María o Sirena..."
-                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200 sm:min-w-[220px]"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-               />
-            </div>
-            <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-2`}>
-               <label className="text-sm font-semibold text-gray-500">¿Qué fecha revisar?</label>
-               <select
-                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200 sm:min-w-[220px]"
-                  value={filtros.tipoFecha}
-                  onChange={(e) => setFiltros({ ...filtros, tipoFecha: e.target.value })}
-               >
-                  <option value="todas">Todas las fechas (Cualquiera)</option>
-                  <option value="fechaEntrega">Fecha de Entrega</option>
-                  <option value="fechaDevolucion">Fecha de Devolución</option>
-                  <option value="fechaAjuste">Fecha de Ajuste</option>
-                  <option value="fechaRenta">Fecha de Renta</option>
-               </select>
-            </div>
+             <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-1.5 min-w-[130px]`}>
+                <label className="text-xs font-semibold text-gray-500 truncate">Rango de Tiempo</label>
+                <select
+                   className="w-full h-[38px] rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs sm:text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                   value={filtros.preset}
+                   onChange={(e) => setFiltros({ ...filtros, preset: e.target.value })}
+                >
+                   <option value="todos">Ver Todas</option>
+                   <option value="hoy">Hoy</option>
+                   <option value="manana">Mañana</option>
+                   <option value="semanaPasada">Semana Pasada</option>
+                   <option value="semana">Esta Semana</option>
+                   <option value="siguienteSemana">Siguiente Semana</option>
+                   <option value="personalizado">Rango Personalizado 📅</option>
+                </select>
+             </div>
 
-            <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-2`}>
-               <label className="text-sm font-semibold text-gray-500">Rango de Tiempo</label>
-               <select
-                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200 sm:min-w-[220px]"
-                  value={filtros.preset}
-                  onChange={(e) => setFiltros({ ...filtros, preset: e.target.value })}
-               >
-                  <option value="todos">Ver Todas</option>
-                  <option value="hoy">Hoy</option>
-                  <option value="manana">Mañana</option>
-                  <option value="semana">Esta Semana</option>
-                  <option value="siguienteSemana">Siguiente Semana</option>
-                  <option value="personalizado">Rango Personalizado 📅</option>
-               </select>
-            </div>
+             <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-1 flex-col gap-1.5 min-w-[130px]`}>
+                <label className="text-xs font-semibold text-gray-500 truncate">Estado de Renta</label>
+                <select
+                   className="w-full h-[38px] rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs sm:text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                   value={filtros.estado || 'todos'}
+                   onChange={(e) => setFiltros({ ...filtros, estado: e.target.value })}
+                >
+                   <option value="todos">Todos los Estados</option>
+                   <option value="cita de ajustes">Cita de Ajustes</option>
+                   <option value="ajustes">Ajustes</option>
+                   <option value="planchado">Planchado</option>
+                   <option value="entregado">Entregado</option>
+                   <option value="devuelto">Devuelto</option>
+                   <option value="tintoreria">Tintorería</option>
+                   <option value="en tienda">En tienda</option>
+                   <option value="cancelada">Cancelada</option>
+                </select>
+             </div>
 
-            {filtros.preset === 'personalizado' && (
-               <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-3`}>
-                  <div className="flex flex-1 flex-col gap-2">
-                     <label className="text-sm font-semibold text-gray-500">Desde:</label>
-                     <input
-                        type="date"
-                        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
-                        value={filtros.fechaInicio}
-                        onChange={(e) => setFiltros({ ...filtros, fechaInicio: e.target.value })}
-                     />
-                  </div>
-                  <div className="flex flex-1 flex-col gap-2">
-                     <label className="text-sm font-semibold text-gray-500">Hasta:</label>
-                     <input
-                        type="date"
-                        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
-                        value={filtros.fechaFin}
-                        onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
-                     />
-                  </div>
-               </div>
-            )}
+             {filtros.preset === 'personalizado' && (
+                <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row`}>
+                   <div className="flex flex-1 flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-gray-500 truncate">Desde:</label>
+                      <input
+                         type="date"
+                         className="h-[38px] rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs sm:text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                         value={filtros.fechaInicio}
+                         onChange={(e) => setFiltros({ ...filtros, fechaInicio: e.target.value })}
+                      />
+                   </div>
+                   <div className="flex flex-1 flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-gray-500 truncate">Hasta:</label>
+                      <input
+                         type="date"
+                         className="h-[38px] rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-xs sm:text-sm text-gray-700 shadow-inner outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+                         value={filtros.fechaFin}
+                         onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
+                      />
+                   </div>
+                </div>
+             )}
 
-            <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-col gap-2`}>
-               <label className="text-sm font-semibold text-gray-500 hidden sm:block opacity-0 select-none">Filtro</label>
-               <label className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-inner cursor-pointer hover:border-pink-300 transition h-[38px]">
-                  <input
-                     type="checkbox"
-                     checked={filtros.soloPendientesLiquidar}
-                     onChange={(e) => setFiltros({ ...filtros, soloPendientesLiquidar: e.target.checked })}
-                     className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500 cursor-pointer"
-                  />
-                  <span>Por Liquidar</span>
-               </label>
-            </div>
+             <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-none flex-col gap-1.5`}>
+                <label className="text-xs font-semibold text-gray-500 opacity-0 hidden sm:block select-none pointer-events-none">Filtro</label>
+                <label className="flex h-[38px] items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-gray-700 shadow-inner cursor-pointer hover:border-pink-300 transition whitespace-nowrap">
+                   <input
+                      type="checkbox"
+                      checked={filtros.soloPendientesLiquidar}
+                      onChange={(e) => setFiltros({ ...filtros, soloPendientesLiquidar: e.target.checked })}
+                      className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500 cursor-pointer"
+                   />
+                   <span>Por Liquidar</span>
+                </label>
+             </div>
 
-            <button
-               className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex w-full sm:w-auto h-[38px] items-center justify-center gap-2 rounded-xl bg-pink-100 px-4 py-2 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-200 shadow-sm`}
-               onClick={clearFilters}
-            >
-               <AiOutlineClear />
-               <span>Limpiar</span>
-            </button>
-         </div>
+             <div className={`${showFiltersMobile ? 'flex' : 'hidden'} sm:flex flex-none flex-col gap-1.5`}>
+                <label className="text-xs font-semibold text-gray-500 opacity-0 hidden sm:block select-none pointer-events-none">Acción</label>
+                <button
+                   className="flex h-[38px] items-center justify-center gap-1.5 rounded-xl bg-pink-100 px-3.5 py-2 text-xs sm:text-sm font-medium text-pink-700 transition-colors hover:bg-pink-200 shadow-sm whitespace-nowrap"
+                   onClick={clearFilters}
+                >
+                   <AiOutlineClear />
+                   <span>Limpiar</span>
+                </button>
+             </div>
+          </div>
 
          <div className="mb-3 px-1">
             <p className="text-sm font-medium text-gray-600">{rentasFiltradas.length} rentas encontradas</p>

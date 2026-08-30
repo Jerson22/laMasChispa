@@ -12,6 +12,15 @@ const Producto = () => {
    const [errorVentas, setErrorVentas] = useState(null);
    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+   const userStr = localStorage.getItem('user');
+   let parsedUser = null;
+   try {
+      parsedUser = userStr ? JSON.parse(userStr) : null;
+   } catch {
+      parsedUser = null;
+   }
+   const canSeeMeInteresa = !!localStorage.getItem('token') && (parsedUser?.rol === 'admin' || parsedUser?.rol === 'chispa1');
+
    useEffect(() => {
       const fetchProducto = async () => {
          try {
@@ -201,7 +210,14 @@ const Producto = () => {
                   </div>
                ) : null}
 
-               <button className="btn-contactar">Me interesa</button>
+               {canSeeMeInteresa && (
+                  <button 
+                     className="btn-contactar"
+                     onClick={() => navigate(`/admin?productId=${product.id}`, { state: { productId: product.id } })}
+                  >
+                     Rentar
+                  </button>
+               )}
             </div>
          </div>
       </div>

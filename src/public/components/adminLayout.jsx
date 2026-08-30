@@ -64,7 +64,7 @@ export default function AdminLayout() {
       }`;
 
    return (
-      <div className="group flex min-h-screen flex-col lg:flex-row">
+      <div className="group flex min-h-screen flex-col lg:flex-row bg-[#f9a8d4]">
 
          {/* ==========================================
              1. BARRA ESCRITORIO (hidden lg:flex)
@@ -78,7 +78,9 @@ export default function AdminLayout() {
                <NavLink to="/admin" end className={desktopLinkStyles}>Nueva Renta</NavLink>
                <NavLink to="/admin/rentas" className={desktopLinkStyles}>Rentas</NavLink>
                <NavLink to="/admin/nuevo-cliente" className={desktopLinkStyles}>Nuevo Cliente</NavLink>
-               <NavLink to="/admin/inventario" className={desktopLinkStyles}>Inventario</NavLink>
+               {parsedUser?.rol !== 'chispa1' && (
+                  <NavLink to="/admin/inventario" className={desktopLinkStyles}>Inventario</NavLink>
+               )}
                {parsedUser?.rol !== 'chispa1' && (
                   <NavLink to="/admin/dinero" className={desktopLinkStyles}>Dinero</NavLink>
                )}
@@ -117,10 +119,12 @@ export default function AdminLayout() {
                <span>Cliente</span>
             </NavLink>
 
-            <NavLink to="/admin/inventario" className={mobileLinkStyles}>
-               <FaBoxes className="text-lg mb-0.5" />
-               <span>Inventario</span>
-            </NavLink>
+            {parsedUser?.rol !== 'chispa1' && (
+               <NavLink to="/admin/inventario" className={mobileLinkStyles}>
+                  <FaBoxes className="text-lg mb-0.5" />
+                  <span>Inventario</span>
+               </NavLink>
+            )}
 
             {parsedUser?.rol !== 'chispa1' && (
                <NavLink to="/admin/dinero" className={mobileLinkStyles}>
@@ -144,7 +148,7 @@ export default function AdminLayout() {
              3. CONTENEDOR DINÁMICO DEL ADMIN
              Agregamos pb-20 en móvil para que la barra inferior no tape los formularios
             ========================================== */}
-         <main className="flex-1 p-5 pb-20 lg:pb-5">
+         <main className="flex-1 p-5 pb-20 lg:pb-5 bg-[#f9a8d4]">
             <Outlet context={{ token }} />
          </main>
       </div>

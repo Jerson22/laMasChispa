@@ -67,8 +67,40 @@ const Vestidos = () => {
    };
 
    return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-         <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 text-gray-800">Galería de Vestidos</h1>
+      <div className="container mx-auto px-1 py-8 max-w-7xl">
+         {/* Banner Promocional "En La Más Chispa..." */}
+         <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#9c2868] mb-10 shadow-xl min-h-[300px] flex items-center">
+            
+
+            <div className="relative z-10 w-full flex flex-col lg:flex-row items-center justify-between p-6 sm:p-10 md:p-12 pl-14 sm:pl-24 md:pl-32 gap-8">
+               {/* Texto Izquierdo */}
+               <div className="flex-1 max-w-2xl text-left">
+                  <h2 className="font-bodoni text-2xl sm:text-3xl md:text-4xl text-white italic leading-tight mb-4">
+                     En La Más Chispa creemos que todas las mujeres merecen sentirse increíbles.
+                  </h2>
+                  <p className="font-poppins text-xs sm:text-sm md:text-base text-white/90 leading-relaxed mb-6 max-w-xl">
+                     Sin importar la talla, el cuerpo o las reglas que alguien más haya inventado. Aquí celebramos la autenticidad, la confianza y la libertad de usar lo que te haga sentir tú.
+                  </p>
+                  
+                  {/* Badge Amarillo/Dorado */}
+                  <div className="bg-[#fcad26] text-white font-poppins font-bold text-xs sm:text-sm md:text-base px-6 py-2.5 rounded-full inline-flex flex-wrap items-center gap-2 sm:gap-4 shadow-md">
+                     <span>Tu Renta incluye:</span>
+                     <span>Tintorería</span>
+                     <span>Ajustes</span>
+                     <span>Accesorios: Bolsa y Aretes</span>
+                  </div>
+               </div>
+
+               {/* Imagen de Modelos (amigas final.png que ya contiene el círculo rosa) */}
+               <div className="lg:justify-end w-full max-w-[420px] lg:max-w-[500px] float-right">
+                  <img 
+                     src="/images/amigas final.png" 
+                     alt="Amigas La Más Chispa" 
+                     className="w-full h-auto object-contain"
+                  />
+               </div>
+            </div>
+         </div>
 
          <div className="flex flex-col lg:flex-row gap-4 mb-8">
             <input

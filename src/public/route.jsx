@@ -35,6 +35,7 @@ export default function App() {
                <Route path="/contacto" element={<Contacto />} />
                <Route path="/talla" element={<Talla />} />
                <Route path="/preguntas" element={<Preguntas />} />
+               <Route path="/nosotras" element={<Home />} />
                {/* <Route path="/admin" element={<Admin />} /> */}
                {/* SUBRUTAS DE ADMIN: Ahora son hijas de Layout también */}
                {/* Al estar aquí dentro, conservan la Navbar del público */}

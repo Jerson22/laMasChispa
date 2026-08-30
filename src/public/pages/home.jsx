@@ -4,8 +4,7 @@ import { FaMapMarkerAlt, FaClock, FaWhatsapp, FaInstagram, FaFacebookF, FaTiktok
 export default function Home() {
    return (
       <>
-         <div className="relative" style={{
-            // backgroundImage: 'linear-gradient(rgba(249, 168, 212, 0.7), rgba(249, 168, 212, 0.4)), url(/images/flores2.jpeg)',
+         <div className="relative overflow-hidden w-full" style={{
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             minHeight: 'calc(100vh - 80px)', // Restamos la altura aproximada del navbar
@@ -14,40 +13,74 @@ export default function Home() {
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: '#9c2868',
-            padding: '40px 10px 80px 10px' // Padding inferior para dejar espacio a la ola
+            padding: '40px 10px 100px 10px' // Padding inferior para dejar espacio a la ola
          }}>
-            <div className="home-container">
-               <img src="/images/logo.png" alt="Logo" className="mx-auto block w-40 h-auto brightness-0 invert pb-8" />
+            <div className="max-w-7xl w-full mx-auto relative flex flex-col items-center justify-center min-h-[520px] px-2 sm:px-6">
+               {/* Cuadro de Fotos Izquierda */}
+               <img 
+                  src="/images/cuadro de fotos.png" 
+                  alt="Cuadro de fotos izquierda" 
+                  className="hidden lg:block absolute -left-2 xl:left-4 top-1/2 -translate-y-1/2 w-[240px] xl:w-[310px] h-auto object-contain -rotate-[8deg] drop-shadow-2xl z-10 [backface-visibility:hidden] [will-change:transform]"
+               />
 
-               <div className="relative inline-block">
-                  {/* Bola Disco Superior Izquierda */}
-                  <img 
-                     src="/images/bola disco.png" 
-                     alt="Bola disco" 
-                     className="absolute -top-4 -left-8 sm:-left-12 md:-left-16 w-12 sm:w-16 md:w-20 h-auto object-contain pointer-events-none drop-shadow-md" 
-                  />
+               {/* Contenido Central */}
+               <div className="home-container text-center relative z-20 max-w-lg mx-auto">
+                  <img src="/images/logo.png" alt="Logo" className="mx-auto block w-36 sm:w-44 h-auto brightness-0 invert pb-4" />
 
-                  <p className="font-bodoni text-[48px] sm:text-[60px] md:text-[72px] text-white leading-none mb-5">
-                     Ten la <span className="font-pinyon">libertad</span> de<br />
-                     usar lo que te haga <br />
-                     sentir <span className="font-pinyon">única</span>
-                  </p>
+                  <div className="relative inline-block px-6">
+                     {/* Bola Disco Superior Izquierda */}
+                     <img 
+                        src="/images/bola disco.png" 
+                        alt="Bola disco" 
+                        className="absolute -top-4 -left-2 sm:-left-6 md:-left-8 w-10 sm:w-14 md:w-16 h-auto object-contain pointer-events-none drop-shadow-md z-30" 
+                     />
 
-                  {/* Bola Disco Inferior Derecha */}
-                  <img 
-                     src="/images/bola disco.png" 
-                     alt="Bola disco" 
-                     className="absolute bottom-2 -right-6 sm:-right-10 md:-right-14 w-10 sm:w-14 md:w-16 h-auto object-contain pointer-events-none drop-shadow-md scale-x-[-1]" 
-                  />
+                     <p className="font-bodoni text-[36px] sm:text-[50px] md:text-[60px] text-white leading-tight mb-4">
+                        Ten la <span className="font-pinyon">libertad</span> de<br />
+                        usar lo que te haga <br />
+                        sentir <span className="font-pinyon">única</span>
+                     </p>
+
+                     {/* Bola Disco Inferior Derecha */}
+                     <img 
+                        src="/images/bola disco.png" 
+                        alt="Bola disco" 
+                        className="absolute bottom-2 -right-2 sm:-right-4 md:-right-6 w-10 sm:w-12 md:w-14 h-auto object-contain pointer-events-none drop-shadow-md scale-x-[-1] z-30" 
+                     />
+                  </div>
+
+                  <br />
+                  <span className="bg-[#e83d9c] rounded-full font-poppins text-base sm:text-xl font-bold italic text-white px-6 py-2 mb-3 inline-block shadow-md">
+                     Vestidos Curvy / Tallas Extra
+                  </span>
+                  <br />
+                  <span className="text-white block mt-2 font-medium text-xs sm:text-sm tracking-wide opacity-90">@lamaschispa</span>
                </div>
 
-               <br />
-               <span className="bg-[#e83d9c] rounded-full font-poppins text-2xl font-bold italic text-white p-5 py-2 mb-5 inline-block">Vestidos Curvy / Tallas Extra</span><br />
-               <span className="text-white inline-block mt-5">@lamaschispa</span>
+               {/* Cuadro de Fotos Derecha */}
+               <img 
+                  src="/images/cuadro de fotos 2.png" 
+                  alt="Cuadro de fotos derecha" 
+                  className="hidden lg:block absolute -right-2 xl:right-4 top-1/2 -translate-y-1/2 w-[240px] xl:w-[310px] h-auto object-contain rotate-[8deg] drop-shadow-2xl z-10 [backface-visibility:hidden] [will-change:transform]"
+               />
+
+               {/* Para vista móvil/tablet: mostrar los dos cuadros integrados abajo */}
+               <div className="flex lg:hidden justify-center items-center gap-4 sm:gap-8 mt-8 z-10 px-4">
+                  <img 
+                     src="/images/cuadro de fotos.png" 
+                     alt="Cuadro de fotos izquierda" 
+                     className="w-36 sm:w-56 h-auto object-contain -rotate-[6deg] drop-shadow-lg [backface-visibility:hidden]"
+                  />
+                  <img 
+                     src="/images/cuadro de fotos 2.png" 
+                     alt="Cuadro de fotos derecha" 
+                     className="w-36 sm:w-56 h-auto object-contain rotate-[6deg] drop-shadow-lg [backface-visibility:hidden]"
+                  />
+               </div>
             </div>
 
             {/* Borde ondulado en la parte inferior */}
-            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none pointer-events-none">
+            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none pointer-events-none z-20">
                <svg className="relative block w-full h-10 sm:h-14 md:h-16 text-white" viewBox="0 0 1200 120" preserveAspectRatio="none">
                   <path fill="currentColor" d="M0,60 Q30,110 60,60 T120,60 T180,60 T240,60 T300,60 T360,60 T420,60 T480,60 T540,60 T600,60 T660,60 T720,60 T780,60 T840,60 T900,60 T960,60 T1020,60 T1080,60 T1140,60 T1200,60 V120 H0 Z"></path>
                </svg>

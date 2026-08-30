@@ -44,7 +44,7 @@ export default function Layout() {
                <Link to="/talla" onClick={() => setOpen(false)}>¿Cuál es mi talla?</Link>
                <Link to="/preguntas" onClick={() => setOpen(false)}>Preguntas</Link>
                <Link to="/contacto" onClick={() => setOpen(false)}>Contacto</Link>
-               <Link to="/nosotras" onClick={() => setOpen(false)}>Nosotras</Link>
+               <Link to="/" onClick={() => setOpen(false)}>Nosotras</Link>
                {isAdmin ? (
                   <>
                      {/* <Link to="/rentas" onClick={() => setOpen(false)}>Rentas</Link> */}

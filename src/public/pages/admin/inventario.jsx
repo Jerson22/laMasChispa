@@ -52,8 +52,12 @@ const Inventario = () => {
          parsedUser = null;
       }
 
-      if (!token || !parsedUser || (parsedUser.rol !== 'admin' && parsedUser.rol !== 'chispa1')) {
-         clearSession();
+      if (!token || !parsedUser || parsedUser.rol !== 'admin') {
+         if (parsedUser?.rol === 'chispa1') {
+            navigate('/admin');
+         } else {
+            clearSession();
+         }
          return;
       }
 
