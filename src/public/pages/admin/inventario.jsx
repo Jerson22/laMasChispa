@@ -15,7 +15,8 @@ const Inventario = () => {
       talla: '',
       imagenes: [''],
       descripcion: '',
-      vestido: true
+      vestido: true,
+      active: true
    });
 
  
@@ -134,7 +135,7 @@ const Inventario = () => {
 
          if (response.ok) {
             alert(form.id ? 'Producto actualizado' : 'Producto creado');
-            setForm({ id: null, name: '', precio_venta: '', precio_renta: '', precio_vestido: '', color: '', talla: '', silueta:'', mangas:'', imagenes: [''], descripcion: '', vestido: true });
+            setForm({ id: null, name: '', precio_venta: '', precio_renta: '', precio_vestido: '', color: '', talla: '', silueta:'', mangas:'', imagenes: [''], descripcion: '', vestido: true, active: true });
             fetchProductos();
          } else {
             const data = await response.json();
@@ -147,9 +148,11 @@ const Inventario = () => {
 
    // Funcion para cargar los datos de un producto en el formulario para editar
    const handleEdit = (v) => {
+      const isActivo = v.active === undefined || v.active === null || v.active === '1' || v.active === true || v.active === 1 || v.active === 'B1' || v.active === 'b1';
       setForm({
          ...v,
          vestido: v.vestido === '1' || v.vestido === true || v.vestido === 1,
+         active: isActivo,
          imagenes: v.imagenes && v.imagenes.length > 0 ? v.imagenes : ['']
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -239,10 +242,13 @@ const Inventario = () => {
    const productosFiltrados = productos.filter((p) => {
       const term = searchTerm.toLowerCase();
       const tipo = (p.vestido === '1' || p.vestido === true || p.vestido === 1) ? 'vestido' : 'accesorio';
+      const isActivo = p.active === undefined || p.active === null || p.active === '1' || p.active === true || p.active === 1 || p.active === 'B1' || p.active === 'b1';
+      const estado = isActivo ? 'activo' : 'inactivo';
       return (
          p.name.toLowerCase().includes(term) ||
          p.id.toString().includes(term) ||
          tipo.includes(term) ||
+         estado.includes(term) ||
          (p.talla && p.talla.toLowerCase().includes(term))
       );
    });
@@ -253,27 +259,53 @@ const Inventario = () => {
          <section className="form-section">
             <h2>{form.id ? 'Editar Producto' : 'Subir Nuevo Producto'}</h2>
             <form onSubmit={handleSubmit} className="admin-form">
-               <div className="input-group full-width" style={{ marginBottom: '20px' }}>
-                  <label>Tipo de Producto</label>
-                  <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'normal', cursor: 'pointer' }}>
-                        <input 
-                           type="radio" 
-                           name="vestido" 
-                           checked={form.vestido === true} 
-                           onChange={() => setForm({ ...form, vestido: true })} 
-                        />
-                        Vestido
-                     </label>
-                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'normal', cursor: 'pointer' }}>
-                        <input 
-                           type="radio" 
-                           name="vestido" 
-                           checked={form.vestido === false} 
-                           onChange={() => setForm({ ...form, vestido: false })} 
-                        />
-                        Accesorio
-                     </label>
+               <div className="input-group full-width" style={{ display: 'flex', gap: '30px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                  <div>
+                     <label>Tipo de Producto</label>
+                     <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'normal', cursor: 'pointer' }}>
+                           <input 
+                              type="radio" 
+                              name="vestido" 
+                              checked={form.vestido === true} 
+                              onChange={() => setForm({ ...form, vestido: true })} 
+                           />
+                           Vestido
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'normal', cursor: 'pointer' }}>
+                           <input 
+                              type="radio" 
+                              name="vestido" 
+                              checked={form.vestido === false} 
+                              onChange={() => setForm({ ...form, vestido: false })} 
+                           />
+                           Accesorio
+                        </label>
+                     </div>
+                  </div>
+
+                  <div>
+                     <label>Estado del Producto (active)</label>
+                     <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'normal', cursor: 'pointer' }}>
+                           <input 
+                              type="radio" 
+                              name="active" 
+                              checked={form.active === true} 
+                              onChange={() => setForm({ ...form, active: true })} 
+                           />
+                           🟢 Activo
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'normal', cursor: 'pointer' }}>
+                           <input 
+                              type="radio" 
+                              name="active" 
+                              checked={form.active === false} 
+                              onChange={() => setForm({ ...form, active: false })} 
+                           />
+                           🔴 Inactivo
+                        </label>
+                     </div>
                   </div>
                </div>
                <div className="form-grid">
@@ -394,7 +426,7 @@ const Inventario = () => {
                </div>
                <div className="form-actions">
                   <button type="submit" className="save-btn">{form.id ? 'Guardar Cambios' : 'Publicar Producto'}</button>
-                  {form.id && <button type="button" onClick={() => setForm({ id: null, name: '', precio_venta: '', precio_renta: '', precio_vestido: '', color: '', talla: '', imagenes: [''], descripcion: '', vestido: true })} className="cancel-btn">Cancelar</button>}
+                  {form.id && <button type="button" onClick={() => setForm({ id: null, name: '', precio_venta: '', precio_renta: '', precio_vestido: '', color: '', talla: '', silueta: '', mangas: '', imagenes: [''], descripcion: '', vestido: true, active: true })} className="cancel-btn">Cancelar</button>}
                </div>
             </form>
          </section>
@@ -405,19 +437,20 @@ const Inventario = () => {
                <h2 style={{ margin: 0 }}>Gestión de Inventario</h2>
                <input 
                   type="text" 
-                  placeholder="Buscar por ID, nombre, tipo o talla..." 
+                  placeholder="Buscar por ID, nombre, tipo, estado o talla..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{ padding: '10px 15px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px', outline: 'none', backgroundColor: 'white' }}
                />
             </div>
             <div className="admin-table-container" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-               <table className="admin-table" style={{ minWidth: '800px' }}>
+               <table className="admin-table" style={{ minWidth: '850px' }}>
                   <thead>
                      <tr>
                         <th>ID</th>
                         <th>Nombre</th>
                         <th>Tipo</th>
+                        <th>Estado</th>
                         <th>Vestido</th>
                         <th>Venta</th>
                         <th>Renta</th>
@@ -427,24 +460,39 @@ const Inventario = () => {
                   </thead>
                   <tbody>
                      {productosFiltrados.length > 0 ? (
-                        productosFiltrados.map(p => (
-                        <tr key={p.id}>
-                           <td>{p.id}</td>
-                           <td>{p.name}</td>
-                           <td>{(p.vestido === '1' || p.vestido === true || p.vestido === 1) ? 'Vestido' : 'Accesorio'}</td>
-                           <td>${p.precio_vestido}</td>
-                           <td>${p.precio_venta}</td>
-                           <td>${p.precio_renta}</td>
-                           <td>{p.talla || '-'}</td>
-                           <td>
-                              <button onClick={() => handleEdit(p)} className="edit-btn">Editar</button>
-                              <button onClick={() => handleDelete(p.id)} className="delete-btn">Borrar</button>
-                           </td>
-                        </tr>
-                     ))
+                        productosFiltrados.map(p => {
+                           const isActivo = p.active === undefined || p.active === null || p.active === '1' || p.active === true || p.active === 1 || p.active === 'B1' || p.active === 'b1';
+                           return (
+                              <tr key={p.id}>
+                                 <td>{p.id}</td>
+                                 <td>{p.name}</td>
+                                 <td>{(p.vestido === '1' || p.vestido === true || p.vestido === 1) ? 'Vestido' : 'Accesorio'}</td>
+                                 <td>
+                                    <span style={{ 
+                                       padding: '4px 10px', 
+                                       borderRadius: '12px', 
+                                       fontSize: '0.85rem', 
+                                       fontWeight: 'bold',
+                                       backgroundColor: isActivo ? '#e6f4ea' : '#fce8e6', 
+                                       color: isActivo ? '#137333' : '#c5221f' 
+                                    }}>
+                                       {isActivo ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                 </td>
+                                 <td>${p.precio_vestido}</td>
+                                 <td>${p.precio_venta}</td>
+                                 <td>${p.precio_renta}</td>
+                                 <td>{p.talla || '-'}</td>
+                                 <td>
+                                    <button onClick={() => handleEdit(p)} className="edit-btn">Editar</button>
+                                    <button onClick={() => handleDelete(p.id)} className="delete-btn">Borrar</button>
+                                 </td>
+                              </tr>
+                           );
+                        })
                      ) : (
                         <tr>
-                           <td colSpan="8" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No se encontraron productos con esa búsqueda.</td>
+                           <td colSpan="9" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>No se encontraron productos con esa búsqueda.</td>
                         </tr>
                      )}
                   </tbody>

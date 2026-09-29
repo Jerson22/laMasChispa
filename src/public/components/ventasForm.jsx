@@ -463,8 +463,11 @@ export default function VentasForm() {
 
    if (loading) return <div className="admin-msg">Cargando panel...</div>;
 
-   // Filtrado dinámico en tiempo real para las sugerencias del desplegable
+   // Filtrado dinámico en tiempo real para las sugerencias del desplegable (excluyendo inactivos)
    const sugerenciasProductos = productos.filter((p) => {
+      const isActivo = p.active === undefined || p.active === null || p.active === '1' || p.active === true || p.active === 1 || p.active === 'B1' || p.active === 'b1';
+      if (!isActivo) return false;
+
       const term = productSearch.toLowerCase();
       return (
          p.name.toLowerCase().includes(term) ||
