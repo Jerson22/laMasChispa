@@ -8,6 +8,14 @@ const obtenerFechaLocalYMD = () => {
    return localDate.toISOString().split('T')[0];
 };
 
+const parseMonto = (val) => {
+   if (val === undefined || val === null || val === '') return 0;
+   if (typeof val === 'number') return isNaN(val) ? 0 : val;
+   const str = String(val).replace(',', '.').replace(/[^0-9.]/g, '');
+   const parsed = parseFloat(str);
+   return isNaN(parsed) ? 0 : parsed;
+};
+
 export default function VentasForm() {
    const { id } = useParams();
    const location = useLocation();
@@ -393,12 +401,12 @@ export default function VentasForm() {
             fechaRenta: ventasForm.fechaRenta,
             fechaEntrega: ventasForm.fechaEntrega,
             fechaDevolucion: ventasForm.fechaDevolucion,
-            anticipoEfectivo: Number(ventasForm.anticipoEfectivo),
-            pendienteEfectivo: Number(ventasForm.pendienteEfectivo),
-            anticipoTarjeta: Number(ventasForm.anticipoTarjeta),
-            pendienteTarjeta: Number(ventasForm.pendienteTarjeta),
-            extraEfectivo: Number(ventasForm.extraEfectivo),
-            extraTarjeta: Number(ventasForm.extraTarjeta),
+            anticipoEfectivo: parseMonto(ventasForm.anticipoEfectivo),
+            pendienteEfectivo: parseMonto(ventasForm.pendienteEfectivo),
+            anticipoTarjeta: parseMonto(ventasForm.anticipoTarjeta),
+            pendienteTarjeta: parseMonto(ventasForm.pendienteTarjeta),
+            extraEfectivo: parseMonto(ventasForm.extraEfectivo),
+            extraTarjeta: parseMonto(ventasForm.extraTarjeta),
             liquidado: ventasForm.liquidado ? "1" : "0",
             notas: ventasForm.notas,
             telefono: ventasForm.telefono,
@@ -886,20 +894,20 @@ export default function VentasForm() {
                               <div className="space-y-3 text-sm text-gray-700">
                                  <div className="flex justify-between border-b border-pink-100 pb-1.5">
                                     <span>Precio Vestido:</span>
-                                    <span className="font-bold text-gray-900">${selectedProduct ? selectedProduct.precio_renta : '0.00'}</span>
+                                    <span className="font-bold text-gray-900">${selectedProduct ? parseMonto(selectedProduct.precio_renta) : '0.00'}</span>
                                  </div>
                                  <div className="flex justify-between border-b border-pink-100 pb-1.5">
                                     <span>Días Extra:</span>
-                                    <span className="font-bold text-gray-900">${Number(ventasForm.extraEfectivo || 0) + Number(ventasForm.extraTarjeta || 0)}</span>
+                                    <span className="font-bold text-gray-900">${parseMonto(ventasForm.extraEfectivo) + parseMonto(ventasForm.extraTarjeta)}</span>
                                  </div>
                                  <div className="flex justify-between border-b border-pink-100 pb-1.5">
                                     <span>Anticipo Registrado:</span>
-                                    <span className="font-bold text-emerald-600">${Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0)}</span>
+                                    <span className="font-bold text-emerald-600">${parseMonto(ventasForm.anticipoEfectivo) + parseMonto(ventasForm.anticipoTarjeta)}</span>
                                  </div>
                                  <div className="flex justify-between pt-1">
                                     <span className="font-semibold text-gray-800">Resta al Entregar:</span>
                                     <span className="font-extrabold text-red-600">
-                                       ${selectedProduct ? Math.max(0, Number(selectedProduct.precio_renta) - (Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0))) : '0.00'}
+                                       ${selectedProduct ? Math.max(0, parseMonto(selectedProduct.precio_renta) - (parseMonto(ventasForm.anticipoEfectivo) + parseMonto(ventasForm.anticipoTarjeta))) : '0.00'}
                                     </span>
                                  </div>
                               </div>
@@ -925,18 +933,18 @@ export default function VentasForm() {
                         <div className="grid gap-6 md:grid-cols-4">
                            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center">
                               <p className="text-xs font-semibold text-gray-500 uppercase">Precio Renta</p>
-                              <p className="text-xl font-bold text-gray-800">${selectedProduct ? selectedProduct.precio_renta : '0'}</p>
+                              <p className="text-xl font-bold text-gray-800">${selectedProduct ? parseMonto(selectedProduct.precio_renta) : '0'}</p>
                            </div>
                            <div className="rounded-2xl border border-pink-100 bg-pink-50/50 p-4 text-center">
                               <p className="text-xs font-semibold text-pink-600 uppercase">Total Pagado</p>
                               <p className="text-xl font-bold text-pink-700">
-                                 ${Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0) + Number(ventasForm.pendienteEfectivo || 0) + Number(ventasForm.pendienteTarjeta || 0)}
+                                 ${parseMonto(ventasForm.anticipoEfectivo) + parseMonto(ventasForm.anticipoTarjeta) + parseMonto(ventasForm.pendienteEfectivo) + parseMonto(ventasForm.pendienteTarjeta)}
                               </p>
                            </div>
                            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center">
                               <p className="text-xs font-semibold text-gray-500 uppercase">Pendiente</p>
                               <p className="text-xl font-bold text-red-600">
-                                 ${selectedProduct ? Math.max(0, Number(selectedProduct.precio_renta) - (Number(ventasForm.anticipoEfectivo || 0) + Number(ventasForm.anticipoTarjeta || 0) + Number(ventasForm.pendienteEfectivo || 0) + Number(ventasForm.pendienteTarjeta || 0))) : '0'}
+                                 ${selectedProduct ? Math.max(0, parseMonto(selectedProduct.precio_renta) - (parseMonto(ventasForm.anticipoEfectivo) + parseMonto(ventasForm.anticipoTarjeta) + parseMonto(ventasForm.pendienteEfectivo) + parseMonto(ventasForm.pendienteTarjeta))) : '0'}
                               </p>
                            </div>
                            <div className="flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 p-4">
