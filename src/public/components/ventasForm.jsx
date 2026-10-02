@@ -345,8 +345,8 @@ export default function VentasForm() {
    };
 
    // Para envio de Formulario
-   const handleVentaSubmit = async (e) => {
-      e.preventDefault();
+   const handleVentaSubmit = async (e, esVenta = false) => {
+      if (e && e.preventDefault) e.preventDefault();
 
       // 1. Determinar si estamos editando o creando
       const isEditing = !!id; // Esto es true si existe id, false si es undefined
@@ -354,6 +354,21 @@ export default function VentasForm() {
       if (!ventasForm.fechaRenta) {
          alert('⚠️ Por favor, selecciona la Fecha de Renta.');
          return;
+      }
+
+      // Si es una VENTA del vestido, pedir confirmación previa
+      if (esVenta) {
+         if (!ventasForm.productId) {
+            alert('⚠️ Por favor selecciona un vestido antes de registrar la venta.');
+            return;
+         }
+         const nombreProducto = selectedProduct ? selectedProduct.name : 'el vestido seleccionado';
+         const confirmar = window.confirm(
+            `⚠️ ¿Estás seguro de registrar la VENTA de este vestido?\n\n` +
+            `Producto: ${nombreProducto}\n\n` +
+            `Esta acción registrará la transacción y marcará el producto como VENDIDO (inactivo) en el catálogo para que ya no aparezca en nuevas búsquedas.`
+         );
+         if (!confirmar) return;
       }
 
       // 2. Validar disponibilidad de fechas primero
@@ -415,7 +430,8 @@ export default function VentasForm() {
             tirantes: ventasForm.tirantes,
             mangaPuno: ventasForm.mangaPuno,
             cintura: ventasForm.cintura,
-            espalda: ventasForm.espalda
+            espalda: ventasForm.espalda,
+            venderProducto: esVenta
          };
 
          const response = await fetch(url, {
@@ -429,7 +445,11 @@ export default function VentasForm() {
 
          if (!response.ok) throw new Error('Error al guardar la venta');
 
-         alert(isEditing ? 'Venta actualizada correctamente' : 'Venta registrada correctamente');
+         alert(
+            isEditing 
+               ? 'Venta actualizada correctamente' 
+               : (esVenta ? 'Venta registrada correctamente y producto marcado como VENDIDO (Inactivo).' : 'Renta registrada correctamente')
+         );
 
          // Si fue una creación, limpiamos el form
          if (!isEditing) {
@@ -471,10 +491,11 @@ export default function VentasForm() {
 
    if (loading) return <div className="admin-msg">Cargando panel...</div>;
 
-   // Filtrado dinámico en tiempo real para las sugerencias del desplegable (excluyendo inactivos)
+   // Filtrado dinámico en tiempo real para las sugerencias del desplegable (excluyendo inactivos salvo el ya seleccionado)
    const sugerenciasProductos = productos.filter((p) => {
       const isActivo = p.active === undefined || p.active === null || p.active === '1' || p.active === true || p.active === 1 || p.active === 'B1' || p.active === 'b1';
-      if (!isActivo) return false;
+      const isSelected = ventasForm.productId && p.id === Number(ventasForm.productId);
+      if (!isActivo && !isSelected) return false;
 
       const term = productSearch.toLowerCase();
       return (
@@ -1064,10 +1085,19 @@ export default function VentasForm() {
 
                <div className="flex flex-col gap-4 sm:flex-row">
                   <button
-                     type="submit"
-                     className="inline-flex w-full items-center justify-center rounded-full bg-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto"
+                     type="button"
+                     onClick={(e) => handleVentaSubmit(e, false)}
+                     className="inline-flex w-full items-center justify-center rounded-full bg-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto cursor-pointer"
                   >
                      {editandoFlag ? 'Guardar Cambios' : 'Registrar Renta'}
+                  </button>
+
+                  <button
+                     type="button"
+                     onClick={(e) => handleVentaSubmit(e, true)}
+                     className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-pink-600 px-6 py-3.5 text-sm font-bold text-white border-b-4 border-pink-900 shadow-lg shadow-pink-600/40 transition-all duration-150 hover:bg-pink-700 hover:-translate-y-0.5 active:translate-y-1 active:border-b-0 cursor-pointer sm:w-auto"
+                  >
+                     <span>Registrar Venta</span>
                   </button>
                </div>
             </form>

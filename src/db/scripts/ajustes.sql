@@ -38,3 +38,5 @@ ALTER TABLE IF EXISTS public.ventas
 
 ALTER TABLE IF EXISTS public.ventas
     ADD COLUMN "extraTarjeta" numeric;
+
+update productos set active = B'1';

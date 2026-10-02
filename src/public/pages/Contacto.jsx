@@ -83,7 +83,7 @@ export default function Contacto() {
          {/* Iconos de Redes Sociales en la parte inferior */}
          <div className="flex justify-center items-center gap-4 sm:gap-6 mt-12 md:mt-16 mb-8">
             <a 
-               href="https://www.instagram.com/lamaschispa/profilecard/?igsh=emdmdXV3bm9vcW0=" 
+               href="https://www.instagram.com/lamaschispa?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" 
                target="_blank" 
                rel="noreferrer" 
                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#9c2868] text-white flex items-center justify-center text-2xl sm:text-3xl hover:scale-110 transition-transform shadow-md"

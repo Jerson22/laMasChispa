@@ -363,7 +363,7 @@ app.post('/api/validar-disponibilidad', verificarToken, esAdmin, async (req, res
 // insertar ventas
 app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
    console.log("Datos recibidos para venta:", req.body);
-   const { name, productId, bolso, aretes, ajuste, fechaAjustes, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda } = req.body;
+   const { name, productId, bolso, aretes, ajuste, fechaAjustes, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda, venderProducto } = req.body;
    if (!name || !fechaRenta || !fechaEntrega || !fechaDevolucion || anticipoEfectivo === undefined && anticipoTarjeta === undefined) {
       return res.status(400).json({ error: 'Datos incompletos para crear la venta' });
    }
@@ -375,6 +375,11 @@ app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
          [name, productId || null, isTrue(bolso) ? '1' : '0', isTrue(aretes) ? '1' : '0', isTrue(ajuste) ? '1' : '0', fechaAjustes || null, estado, fechaRenta || null, fechaEntrega || null, fechaDevolucion || null, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, isTrue(liquidado) ? '1' : '0', notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda]
       );
       const reservaId = ventasResult.rows[0].id;
+
+      // Si se marcó como Venta directa del vestido, actualizar active = 0 (inactivo/vendido)
+      if (isTrue(venderProducto) && productId) {
+         await db.query("UPDATE productos SET active = '0'::bit WHERE id = $1", [productId]);
+      }
 
       // Insertar anticipos en pagos_renta si son mayores a 0
       const fRenta = fechaRenta ? String(fechaRenta).split('T')[0] : new Date().toISOString().split('T')[0];
@@ -403,7 +408,7 @@ app.post('/api/ventas', verificarToken, esAdmin, async (req, res) => {
 // Endpoint para actualizar formulario de ventas
 app.put('/api/ventas/:id', verificarToken, esAdmin, async (req, res) => {
    const { id } = req.params; // Obtenemos el ID de la URL
-   const { name, productId, bolso, aretes, ajuste, fechaAjuste, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda } = req.body;
+   const { name, productId, bolso, aretes, ajuste, fechaAjuste, fechaRenta, fechaEntrega, fechaDevolucion, anticipoEfectivo, anticipoTarjeta, pendienteEfectivo, pendienteTarjeta, extraEfectivo, extraTarjeta, liquidado, notas, telefono, bastilla, busto, tirantes, mangaPuno, cintura, espalda, venderProducto } = req.body;
    console.log('Parametros recividos', req.body);
    try {
       const isTrue = (val) => val === true || val === 1 || val === '1';
@@ -465,6 +470,11 @@ app.put('/api/ventas/:id', verificarToken, esAdmin, async (req, res) => {
 
       if (result.rowCount === 0) {
          return res.status(404).json({ error: 'Venta no encontrada' });
+      }
+
+      // Si se marcó como Venta directa del vestido, actualizar active = 0 (inactivo/vendido)
+      if (isTrue(venderProducto) && productId) {
+         await db.query("UPDATE productos SET active = '0'::bit WHERE id = $1", [productId]);
       }
 
       res.status(200).json({ mensaje: 'Venta actualizada correctamente', venta: result.rows[0] });
