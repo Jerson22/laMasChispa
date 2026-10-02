@@ -67,14 +67,12 @@ const Vestidos = () => {
    };
 
    return (
-      <div className="container mx-auto px-1 py-8 max-w-7xl">
-         {/* Banner Promocional "En La Más Chispa..." */}
-         <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#9c2868] mb-10 shadow-xl min-h-[300px] flex items-center">
-            
-
-            <div className="relative z-10 w-full flex flex-col lg:flex-row items-center justify-between p-6 sm:p-10 md:p-12 pl-14 sm:pl-24 md:pl-32 gap-8">
+      <div className="w-full">
+         {/* Banner Promocional "En La Más Chispa..." de ancho completo */}
+         <div className="relative w-full rounded-bl-[200px] overflow-hidden bg-[#9c2868] mb-10 shadow-xl min-h-[300px] flex items-end">
+            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center lg:items-end justify-between pt-6 sm:pt-10 md:pt-5 pb-0 pl-10 sm:pl-24 md:pl-20 pr-6 sm:pr-10 md:pr-5 gap-8">
                {/* Texto Izquierdo */}
-               <div className="flex-1 max-w-2xl text-left">
+               <div className="flex-1 max-w-2xl text-left py-6 sm:py-10 md:py-5">
                   <h2 className="font-bodoni text-2xl sm:text-3xl md:text-4xl text-white italic leading-tight mb-4">
                      En La Más Chispa creemos que todas las mujeres merecen sentirse increíbles.
                   </h2>
@@ -92,69 +90,72 @@ const Vestidos = () => {
                </div>
 
                {/* Imagen de Modelos (amigas final.png que ya contiene el círculo rosa) */}
-               <div className="lg:justify-end w-full max-w-[420px] lg:max-w-[500px] float-right">
+               <div className="w-full max-w-[420px] lg:max-w-[500px] flex justify-center lg:justify-end self-end">
                   <img 
                      src="/images/amigas final.png" 
                      alt="Amigas La Más Chispa" 
-                     className="w-full h-auto object-contain"
+                     className="w-full h-auto object-contain block align-bottom"
                   />
                </div>
             </div>
          </div>
 
-         <div className="flex flex-col lg:flex-row gap-4 mb-8">
-            <input
-               type="text"
-               className="w-full lg:flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white"
-               placeholder="Buscar por nombre o descripción..."
-               value={searchTerm}
-               onChange={(e) => setSearchTerm(e.target.value)}
-            />
+         {/* Contenedor principal con padding para el resto de los elementos (filtros y grid) */}
+         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+            <div className="flex flex-col lg:flex-row gap-4 mb-8">
+               <input
+                  type="text"
+                  className="w-full lg:flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white"
+                  placeholder="Buscar por nombre o descripción..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+               />
 
-            <div className="grid grid-cols-4 gap-2 w-full lg:flex-[2]">
-               <select className="w-full px-1 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white" value={selectedTalla} onChange={(e) => setSelectedTalla(e.target.value)}>
-                  <option value="">Tallas</option>
-                  {uniqueTallas.map(talla => (
-                     <option key={talla} value={talla}>{talla.toUpperCase()}</option>
-                  ))}
-               </select>
+               <div className="grid grid-cols-4 gap-2 w-full lg:flex-[2]">
+                  <select className="w-full px-3 sm:px-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white cursor-pointer" value={selectedTalla} onChange={(e) => setSelectedTalla(e.target.value)}>
+                     <option value="">Tallas</option>
+                     {uniqueTallas.map(talla => (
+                        <option key={talla} value={talla}>{talla.toUpperCase()}</option>
+                     ))}
+                  </select>
 
-               <select className="w-full px-1 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
-                  <option value="">Colores</option>
-                  {uniqueColors.map(color => (
-                     <option key={color} value={color}>{mayus(color)}</option>
-                  ))}
-               </select>
+                  <select className="w-full px-3 sm:px-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white cursor-pointer" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
+                     <option value="">Colores</option>
+                     {uniqueColors.map(color => (
+                        <option key={color} value={color}>{mayus(color)}</option>
+                     ))}
+                  </select>
 
-               <select className="w-full px-1 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white" value={selectedSilueta} onChange={(e) => setSelectedSilueta(e.target.value)}>
-                  <option value="">Siluetas</option>
-                  {uniqueSiluetas.map(silueta => (
-                     <option key={silueta} value={silueta}>Corte {mayus(silueta)}</option>
-                  ))}
-               </select>
+                  <select className="w-full px-3 sm:px-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white cursor-pointer" value={selectedSilueta} onChange={(e) => setSelectedSilueta(e.target.value)}>
+                     <option value="">Siluetas</option>
+                     {uniqueSiluetas.map(silueta => (
+                        <option key={silueta} value={silueta}>Corte {mayus(silueta)}</option>
+                     ))}
+                  </select>
 
-               <select className="w-full px-1 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white" value={selectedMangas} onChange={(e) => setSelectedMangas(e.target.value)}>
-                  <option value="">Mangas</option>
-                  {uniqueMangas.map(mangas => (
-                     <option key={mangas} value={mangas}>{mayus(mangas)}</option>
-                  ))}
-               </select>
+                  <select className="w-full px-3 sm:px-4 py-2 text-xs sm:text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white cursor-pointer" value={selectedMangas} onChange={(e) => setSelectedMangas(e.target.value)}>
+                     <option value="">Mangas</option>
+                     {uniqueMangas.map(mangas => (
+                        <option key={mangas} value={mangas}>{mayus(mangas)}</option>
+                     ))}
+                  </select>
+               </div>
+
+               <button className="w-full lg:w-auto flex items-center justify-center gap-2 px-5 py-2 bg-pink-100 text-pink-700 hover:bg-pink-200 rounded-full transition-colors font-medium cursor-pointer" onClick={clearFilters}>
+                  <AiOutlineClear />
+                  <span>Limpiar</span>
+               </button>
             </div>
 
-            <button className="w-full lg:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-pink-100 text-pink-700 hover:bg-pink-200 rounded-md transition-colors font-medium" onClick={clearFilters}>
-               <AiOutlineClear />
-               <span>Limpiar</span>
-            </button>
-         </div>
-
-         <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 md:gap-6">
-            {vestidosFiltrados.length > 0 ? (
-               vestidosFiltrados.map((vestido) => (
-                  <ProductCard key={vestido.id} product={vestido} />
-               ))
-            ) : (
-               <p className="col-span-full text-center text-gray-500 py-8">No se encontraron vestidos con esos filtros.</p>
-            )}
+            <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 md:gap-6">
+               {vestidosFiltrados.length > 0 ? (
+                  vestidosFiltrados.map((vestido) => (
+                     <ProductCard key={vestido.id} product={vestido} />
+                  ))
+               ) : (
+                  <p className="col-span-full text-center text-gray-500 py-8">No se encontraron vestidos con esos filtros.</p>
+               )}
+            </div>
          </div>
       </div>
    );
