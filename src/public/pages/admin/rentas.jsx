@@ -359,6 +359,7 @@ export default function Rentas() {
                    <option value="tintoreria">Tintorería</option>
                    <option value="en tienda">En tienda</option>
                    <option value="cancelada">Cancelada</option>
+                   <option value="vendido">Vendido</option>
                 </select>
              </div>
 
