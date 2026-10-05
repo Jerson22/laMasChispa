@@ -105,19 +105,19 @@ export default function Home() {
             </div>
          </div>
 
-         <div className="px-6 md:px-20 mt-10">
+         <div className="px-4 sm:px-6 md:px-20 mt-8 md:mt-10">
             {/* Título + Raya */}
             <div className="flex items-center gap-4">
-               <span className="text-[#ffb727] text-[36px] md:text-[50px] font-bodoni">
+               <span className="text-[#ffb727] text-[28px] sm:text-[36px] md:text-[50px] leading-tight font-bodoni">
                   Conoce a los <span className="font-pinyon">Recien llegados</span>
                </span>
-               <div className="w-20 h-[1px] bg-[#ffb727]"></div>
+               <div className="hidden sm:block w-20 h-[1px] bg-[#ffb727]"></div>
             </div>
 
             {/* Galería de fotos horizontal en una nueva línea */}
-            <div className="flex items-center justify-between mt-6 overflow-x-auto">
+            <div className="flex items-center gap-3 md:gap-0 md:justify-between mt-6 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                {recientes.map((vestido) => (
-                  <Link key={vestido.id} to={`/producto/${vestido.id}`} className="flex-shrink-0">
+                  <Link key={vestido.id} to={`/producto/${vestido.id}`} className="flex-shrink-0 snap-start">
                      {vestido.imagenes?.length > 0 ? (
                         <img src={'/images/' + vestido.imagenes[0]} alt={vestido.name} className="w-45 h-auto object-cover rounded-2xl shadow-sm" />
                      ) : (
@@ -128,15 +128,15 @@ export default function Home() {
             </div>
          </div>
 
-         <div className=" px-6 md:px-20 mt-15 text-center">
-            <span className="font-bodoni text-[36px] md:text-[50px]">¿Cómo Rentar?</span>
-            <div className="bg-[#fff8f5] p-10 font-poppins mt-5">
-               <div className="flex text-center justify-center gap-40 ">
-                  <div className="flex flex-col items-center gap-3"><img src="/images/Artboard 1.png" alt="" />Encuentra el vestido<br /> perfecto aquí en nuestro catalogo<br /> o fisicamente en nuestra tienda</div>
-                  <div className="flex flex-col items-center gap-3"><img src="/images/Artboard 2.png" alt="" />Acude a nuestra tienda<br /> para medirtelo y separarlo</div>
+         <div className="px-4 sm:px-6 md:px-20 mt-10 md:mt-15 text-center">
+            <span className="font-bodoni text-[30px] md:text-[50px]">¿Cómo Rentar?</span>
+            <div className="bg-[#fff8f5] p-5 sm:p-10 font-poppins mt-5 text-sm sm:text-base">
+               <div className="flex flex-col md:flex-row text-center justify-center gap-8 md:gap-40">
+                  <div className="flex flex-col items-center gap-3"><img src="/images/Artboard 1.png" alt="" className="max-w-[60%] sm:max-w-full h-auto" />Encuentra el vestido<br /> perfecto aquí en nuestro catalogo<br /> o fisicamente en nuestra tienda</div>
+                  <div className="flex flex-col items-center gap-3"><img src="/images/Artboard 2.png" alt="" className="max-w-[60%] sm:max-w-full h-auto" />Acude a nuestra tienda<br /> para medirtelo y separarlo</div>
                </div>
-               <div className="flex text-center justify-center gap-5 mt-10 text-xl items-baseline">
-                  <div className="font-bodoni text-3xl">Tu Renta incluye:</div>
+               <div className="flex flex-wrap text-center justify-center gap-x-5 gap-y-2 mt-8 md:mt-10 text-base md:text-xl items-baseline">
+                  <div className="font-bodoni text-2xl md:text-3xl w-full md:w-auto">Tu Renta incluye:</div>
                   <div className="font-bold">Tintorería</div>
                   <div className="font-bold">Ajustes</div>
                   <div>Accesorios: <span className="font-bold">Bolsa y Aretes</span></div>
@@ -145,7 +145,7 @@ export default function Home() {
          </div>
 
          {/* Sección Hola Hermosa con foto Flotada (float-right) y bordes ondulados laterales */}
-         <div className="relative mt-15 px-10 md:px-24 block overflow-hidden py-10">
+         <div className="relative mt-10 md:mt-15 px-8 sm:px-10 md:px-24 block overflow-hidden py-8 md:py-10">
             {/* Bordes ondulados fucsia anchos con base sólida a la izquierda */}
             <div className="absolute top-0 bottom-0 left-0 w-[50px] md:w-[70px] h-full pointer-events-none z-10 overflow-hidden">
                <svg className="w-full h-full">
@@ -174,15 +174,15 @@ export default function Home() {
             <img 
                src="/images/YO2.png" 
                alt="Abi Rosas - La Más Chispa" 
-               className="float-right mb-6 w-full max-w-sm md:max-w-md lg:max-w-[500px] h-auto object-contain -rotate-[10deg]" 
+               className="block md:float-right mx-auto md:mx-0 mb-6 w-4/5 max-w-[260px] md:w-full md:max-w-md lg:max-w-[500px] h-auto object-contain -rotate-[10deg]"
             />
 
             {/* Título y Texto */}
-            <div className="text-left font-poppins text-gray-800 text-base md:text-lg leading-relaxed">
-               <span className="font-bodoni italic text-[48px] md:text-[50px] text-[#9c2868] block leading-tight">
+            <div className="text-left font-poppins text-gray-800 text-[15px] md:text-lg leading-relaxed">
+               <span className="font-bodoni italic text-[32px] sm:text-[40px] md:text-[50px] text-[#9c2868] block leading-tight">
                   Hola, hermosa 💖
                </span>
-               <span className="font-bodoni italic text-[48px] md:text-[50px] text-[#9c2868] block leading-tight mb-6">
+               <span className="font-bodoni italic text-[32px] sm:text-[40px] md:text-[50px] text-[#9c2868] block leading-tight mb-6">
                   ¡Bienvenida a tu lugar seguro!
                </span>
                

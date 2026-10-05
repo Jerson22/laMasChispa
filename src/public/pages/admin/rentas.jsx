@@ -626,6 +626,8 @@ export default function Rentas() {
                            <option value="devuelto">Devuelto</option>
                            <option value="tintoreria">Tintorería</option>
                            <option value="en tienda">En tienda</option>
+                           <option value="cancelada">Cancelada</option>
+                           <option value="vendido">Vendido</option>
                         </select>
                         <button className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100 text-lg text-pink-700 shadow-sm transition hover:bg-pink-200 hover:text-pink-700 shadow-sm" onClick={() => handleDownloadPdf(renta)}>
                            <IoReceiptOutline />

@@ -1095,9 +1095,9 @@ export default function VentasForm() {
                   <button
                      type="button"
                      onClick={(e) => handleVentaSubmit(e, true)}
-                     className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-pink-400 px-6 py-3.5 text-sm font-bold text-white border-b-4 border-pink-900 shadow-lg shadow-pink-600/40 transition-all duration-150 hover:bg-pink-700 hover:-translate-y-0.5 active:translate-y-1 active:border-b-0 cursor-pointer sm:w-auto"
+                     className="inline-flex w-full items-center justify-center rounded-full bg-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto cursor-pointer"
                   >
-                     <span>Registrar Venta</span>
+                     Registrar Venta
                   </button>
                </div>
             </form>

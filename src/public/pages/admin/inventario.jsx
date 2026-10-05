@@ -443,7 +443,9 @@ const Inventario = () => {
                   style={{ padding: '10px 15px', border: '1px solid #ddd', borderRadius: '8px', minWidth: '250px', outline: 'none', backgroundColor: 'white' }}
                />
             </div>
-            <div className="admin-table-container" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <p className="mb-3 px-1 text-sm font-medium text-gray-600">{productosFiltrados.length} productos encontrados</p>
+
+            <div className="admin-table-container hidden md:block" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                <table className="admin-table" style={{ minWidth: '850px' }}>
                   <thead>
                      <tr>
@@ -497,6 +499,43 @@ const Inventario = () => {
                      )}
                   </tbody>
                </table>
+            </div>
+
+            {/* Vista móvil: tarjetas */}
+            <div className="space-y-3 md:hidden">
+               {productosFiltrados.length > 0 ? (
+                  productosFiltrados.map(p => {
+                     const isActivo = p.active === undefined || p.active === null || p.active === '1' || p.active === true || p.active === 1 || p.active === 'B1' || p.active === 'b1';
+                     const esVestido = p.vestido === '1' || p.vestido === true || p.vestido === 1;
+                     return (
+                        <div key={p.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                           <div className="flex items-start justify-between gap-3">
+                              <div>
+                                 <p className="text-sm font-semibold text-pink-600">Producto #{p.id}</p>
+                                 <p className="mt-1 text-sm font-medium text-gray-800">{p.name}</p>
+                                 <p className="text-xs text-gray-500">{esVestido ? 'Vestido' : 'Accesorio'}{p.talla ? ` · ${p.talla}` : ''}</p>
+                              </div>
+                              <span className={`rounded-full px-3 py-1 text-xs font-bold ${isActivo ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                 {isActivo ? 'Activo' : 'Inactivo'}
+                              </span>
+                           </div>
+
+                           <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-gray-50 p-3 text-center text-sm text-gray-700">
+                              <p><span className="block text-xs font-semibold text-gray-500">Vestido</span>${p.precio_vestido}</p>
+                              <p><span className="block text-xs font-semibold text-gray-500">Venta</span>${p.precio_venta}</p>
+                              <p><span className="block text-xs font-semibold text-gray-500">Renta</span>${p.precio_renta}</p>
+                           </div>
+
+                           <div className="mt-3 flex gap-2">
+                              <button onClick={() => handleEdit(p)} className="flex-1 rounded-lg bg-blue-500 py-2 text-sm font-semibold text-white">Editar</button>
+                              <button onClick={() => handleDelete(p.id)} className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white">Borrar</button>
+                           </div>
+                        </div>
+                     );
+                  })
+               ) : (
+                  <p className="py-5 text-center text-gray-500">No se encontraron productos con esa búsqueda.</p>
+               )}
             </div>
          </section>
 

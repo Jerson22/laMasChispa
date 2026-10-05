@@ -69,7 +69,7 @@ const Vestidos = () => {
    return (
       <div className="w-full">
          {/* Banner Promocional "En La Más Chispa..." de ancho completo */}
-         <div className="relative w-full rounded-bl-[200px] overflow-hidden bg-[#9c2868] mb-10 shadow-xl min-h-[300px] flex items-end">
+         <div className="relative w-full sm:rounded-bl-[200px] overflow-hidden bg-[#9c2868] mb-10 shadow-xl min-h-[300px] flex items-end">
             <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center lg:items-end justify-between pt-6 sm:pt-10 md:pt-5 pb-0 pl-10 sm:pl-24 md:pl-20 pr-6 sm:pr-10 md:pr-5 gap-8">
                {/* Texto Izquierdo */}
                <div className="flex-1 max-w-2xl text-left py-6 sm:py-10 md:py-5">
