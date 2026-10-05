@@ -1,7 +1,25 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaMapMarkerAlt, FaClock, FaWhatsapp, FaInstagram, FaFacebookF, FaTiktok } from "react-icons/fa";
 
 export default function Home() {
+   const [recientes, setRecientes] = useState([]);
+
+   useEffect(() => {
+      const fetchRecientes = async () => {
+         try {
+            const response = await fetch('/api/vestidos');
+            if (!response.ok) throw new Error('Error al cargar los vestidos');
+            const data = await response.json();
+            setRecientes(data.slice(0, 6));
+         } catch (err) {
+            console.error(err);
+         }
+      };
+
+      fetchRecientes();
+   }, []);
+
    return (
       <>
          <div className="relative overflow-hidden w-full" style={{
@@ -98,12 +116,15 @@ export default function Home() {
 
             {/* Galería de fotos horizontal en una nueva línea */}
             <div className="flex items-center justify-between mt-6 overflow-x-auto">
-               <img src="/images/shineGold.jpg" alt="Vestido" className="w-45 h-auto object-cover rounded-2xl shadow-sm flex-shrink-0" />
-               <img src="/images/rosaTopacio.jpg" alt="Vestido" className="w-45 h-auto object-cover rounded-2xl shadow-sm flex-shrink-0" />
-               <img src="/images/redDress.jpg" alt="Vestido" className="w-45 h-auto object-cover rounded-2xl shadow-sm flex-shrink-0" />
-               <img src="/images/pinkDress.jpg" alt="Vestido" className="w-45 h-auto object-cover rounded-2xl shadow-sm flex-shrink-0" />
-               <img src="/images/goldPink.jpg" alt="Vestido" className="w-45 h-auto object-cover rounded-2xl shadow-sm flex-shrink-0" />
-               <img src="/images/goldPink.jpg" alt="Vestido" className="w-45 h-auto object-cover rounded-2xl shadow-sm flex-shrink-0" />
+               {recientes.map((vestido) => (
+                  <Link key={vestido.id} to={`/producto/${vestido.id}`} className="flex-shrink-0">
+                     {vestido.imagenes?.length > 0 ? (
+                        <img src={'/images/' + vestido.imagenes[0]} alt={vestido.name} className="w-45 h-auto object-cover rounded-2xl shadow-sm" />
+                     ) : (
+                        <div className="w-45 aspect-[3/4] flex items-center justify-center text-4xl bg-gray-100 rounded-2xl shadow-sm">👗</div>
+                     )}
+                  </Link>
+               ))}
             </div>
          </div>
 
