@@ -675,15 +675,15 @@ export default function VentasForm() {
                      </div>
 
                      {selectedProduct && (
-                        <div className="flex flex-col gap-4 rounded-[24px] border border-pink-100 bg-pink-50/70 p-4 shadow-sm sm:flex-row">
+                        <div className="flex flex-row items-center gap-3 rounded-[24px] border border-pink-100 bg-pink-50/70 p-3 shadow-sm sm:gap-4 sm:p-4">
                            <img
                               src={selectedProduct.imagenes && selectedProduct.imagenes[0] ? `/images/${selectedProduct.imagenes[0]}` : 'https://via.placeholder.com/100x130?text=No+Foto'}
                               alt="Vista previa"
-                              className="h-32 w-24 flex-none rounded-3xl object-cover"
+                              className="h-28 w-20 flex-none rounded-2xl object-cover sm:h-32 sm:w-24 sm:rounded-3xl"
                            />
-                           <div className="space-y-1 text-sm text-gray-700">
-                              <h4 className="text-base font-semibold text-pink-700">{selectedProduct.name}</h4>
-                              {selectedProduct.talla && <p><span className="font-semibold text-gray-800">Talla:</span> {selectedProduct.talla}</p>}
+                           <div className="min-w-0 flex-1 space-y-0.5 text-xs text-gray-700 sm:space-y-1 sm:text-sm">
+                              <h4 className="break-words text-sm font-semibold text-pink-700 sm:text-base">{selectedProduct.name}</h4>
+                              {selectedProduct.talla && <p className="truncate"><span className="font-semibold text-gray-800">Talla:</span> {selectedProduct.talla}</p>}
                               {selectedProduct.precio_vestido && <p><span className="font-semibold text-gray-800">Precio Vestido:</span> ${selectedProduct.precio_vestido}</p>}
                               {selectedProduct.precio_renta && <p><span className="font-semibold text-gray-800">Precio Renta:</span> ${selectedProduct.precio_renta}</p>}
                               {selectedProduct.precio_venta && <p><span className="font-semibold text-gray-800">Precio Venta:</span> ${selectedProduct.precio_venta}</p>}
@@ -1095,7 +1095,7 @@ export default function VentasForm() {
                   <button
                      type="button"
                      onClick={(e) => handleVentaSubmit(e, true)}
-                     className="inline-flex w-full items-center justify-center rounded-full bg-pink-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto cursor-pointer"
+                     className="inline-flex w-full items-center justify-center rounded-full bg-pink-300 px-6 py-3 text-sm font-semibold text-white transition hover:bg-pink-700 sm:w-auto cursor-pointer"
                   >
                      Registrar Venta
                   </button>

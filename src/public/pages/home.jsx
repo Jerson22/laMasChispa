@@ -4,6 +4,77 @@ import { FaMapMarkerAlt, FaClock, FaWhatsapp, FaInstagram, FaFacebookF, FaTiktok
 
 export default function Home() {
    const [recientes, setRecientes] = useState([]);
+   const [clienteIndex, setClienteIndex] = useState(0);
+   const [visibleCount, setVisibleCount] = useState(3);
+   const [isHovered, setIsHovered] = useState(false);
+   const [touchStartX, setTouchStartX] = useState(null);
+
+   const fotosClientes = [
+      "/images/cliente 7.jpg",
+      "/images/cliente 3.jpg",
+      "/images/cliente 1.jpg",
+      "/images/cliente 5.jpg",
+      "/images/cliente 2.jpg",
+   ];
+
+   // Ajustar cantidad de fotos visibles según el ancho de pantalla (3 en celular, 4 en tablet/601px, 5 en PC)
+   useEffect(() => {
+      const updateVisible = () => {
+         if (window.innerWidth >= 1024) {
+            setVisibleCount(5);
+         } else if (window.innerWidth >= 580) {
+            setVisibleCount(4);
+         } else {
+            setVisibleCount(3);
+         }
+      };
+      updateVisible();
+      window.addEventListener('resize', updateVisible);
+      return () => window.removeEventListener('resize', updateVisible);
+   }, []);
+
+   const maxIndex = Math.max(0, fotosClientes.length - visibleCount);
+
+   // Corregir índice si la pantalla se redimensiona
+   useEffect(() => {
+      if (clienteIndex > maxIndex) {
+         setClienteIndex(maxIndex);
+      }
+   }, [clienteIndex, maxIndex]);
+
+   // Auto-play solo cuando hay fotos que no caben al mismo tiempo
+   useEffect(() => {
+      if (isHovered || maxIndex === 0) return;
+      const timer = setInterval(() => {
+         setClienteIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+      }, 3500);
+      return () => clearInterval(timer);
+   }, [isHovered, maxIndex]);
+
+   const nextCliente = () => {
+      if (maxIndex === 0) return;
+      setClienteIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+   };
+
+   const prevCliente = () => {
+      if (maxIndex === 0) return;
+      setClienteIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+   };
+
+   const handleTouchStart = (e) => {
+      setTouchStartX(e.touches[0].clientX);
+   };
+
+   const handleTouchEnd = (e) => {
+      if (touchStartX === null || maxIndex === 0) return;
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (diff > 40) {
+         nextCliente();
+      } else if (diff < -40) {
+         prevCliente();
+      }
+      setTouchStartX(null);
+   };
 
    useEffect(() => {
       const fetchRecientes = async () => {
@@ -22,77 +93,60 @@ export default function Home() {
 
    return (
       <>
-         <div className="relative overflow-hidden w-full" style={{
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            minHeight: 'calc(100vh - 80px)', // Restamos la altura aproximada del navbar
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#9c2868',
-            padding: '40px 10px 100px 10px' // Padding inferior para dejar espacio a la ola
-         }}>
-            <div className="max-w-7xl w-full mx-auto relative flex flex-col items-center justify-center min-h-[520px] px-2 sm:px-6">
-               {/* Cuadro de Fotos Izquierda */}
-               <img 
-                  src="/images/cuadro de fotos.png" 
-                  alt="Cuadro de fotos izquierda" 
-                  className="hidden lg:block absolute -left-2 xl:left-4 top-1/2 -translate-y-1/2 w-[240px] xl:w-[310px] h-auto object-contain -rotate-[8deg] drop-shadow-2xl z-10 [backface-visibility:hidden] [will-change:transform]"
-               />
-
-               {/* Contenido Central */}
-               <div className="home-container text-center relative z-20 max-w-lg mx-auto">
-                  <img src="/images/logo.png" alt="Logo" className="mx-auto block w-36 sm:w-44 h-auto brightness-0 invert pb-4" />
-
-                  <div className="relative inline-block px-6">
-                     {/* Bola Disco Superior Izquierda */}
-                     <img 
-                        src="/images/bola disco.png" 
-                        alt="Bola disco" 
-                        className="absolute -top-4 -left-2 sm:-left-6 md:-left-8 w-10 sm:w-14 md:w-16 h-auto object-contain pointer-events-none drop-shadow-md z-30" 
-                     />
-
-                     <p className="font-bodoni text-[36px] sm:text-[50px] md:text-[60px] text-white leading-tight mb-4">
-                        Ten la <span className="font-pinyon">libertad</span> de<br />
-                        usar lo que te haga <br />
-                        sentir <span className="font-pinyon">única</span>
-                     </p>
-
-                     {/* Bola Disco Inferior Derecha */}
-                     <img 
-                        src="/images/bola disco.png" 
-                        alt="Bola disco" 
-                        className="absolute bottom-2 -right-2 sm:-right-4 md:-right-6 w-10 sm:w-12 md:w-14 h-auto object-contain pointer-events-none drop-shadow-md scale-x-[-1] z-30" 
-                     />
-                  </div>
-
-                  <br />
-                  <span className="bg-[#e83d9c] rounded-full font-poppins text-base sm:text-xl font-bold italic text-white px-6 py-2 mb-3 inline-block shadow-md">
-                     Vestidos Curvy / Tallas Extra
-                  </span>
-                  <br />
-                  <span className="text-white block mt-2 font-medium text-xs sm:text-sm tracking-wide opacity-90">@lamaschispa</span>
-               </div>
-
-               {/* Cuadro de Fotos Derecha */}
-               <img 
-                  src="/images/cuadro de fotos 2.png" 
-                  alt="Cuadro de fotos derecha" 
-                  className="hidden lg:block absolute -right-2 xl:right-4 top-1/2 -translate-y-1/2 w-[240px] xl:w-[310px] h-auto object-contain rotate-[8deg] drop-shadow-2xl z-10 [backface-visibility:hidden] [will-change:transform]"
-               />
-
-               {/* Para vista móvil/tablet: mostrar los dos cuadros integrados abajo */}
-               <div className="flex lg:hidden justify-center items-center gap-4 sm:gap-8 mt-8 z-10 px-4">
+         <div 
+            className="relative overflow-hidden w-full flex flex-col items-center justify-center bg-[#9c2868] pt-8 pb-14 sm:pt-10 sm:pb-16 md:pt-12 md:pb-20 lg:min-h-[calc(100vh-80px)] px-2 sm:px-4 md:px-6"
+         >
+            <div className="max-w-7xl w-full mx-auto relative flex flex-row items-center justify-between sm:justify-around lg:justify-between gap-1 sm:gap-4 md:gap-8 px-1 sm:px-2 md:px-6">
+               {/* Sección 1: Esfera arriba y Cuadro abajo (Izquierda) */}
+               <div className="flex flex-col items-center justify-center flex-shrink-0 z-10">
+                  <img 
+                     src="/images/bola disco.png" 
+                     alt="Esfera disco izquierda" 
+                     className="w-[clamp(28px,6vw,80px)] h-auto object-contain drop-shadow-md mb-2 sm:mb-3 md:mb-4 pointer-events-none [backface-visibility:hidden]" 
+                  />
                   <img 
                      src="/images/cuadro de fotos.png" 
                      alt="Cuadro de fotos izquierda" 
-                     className="w-36 sm:w-56 h-auto object-contain -rotate-[6deg] drop-shadow-lg [backface-visibility:hidden]"
+                     className="w-[clamp(65px,19vw,290px)] h-auto object-contain -rotate-[6deg] md:-rotate-[8deg] drop-shadow-2xl [backface-visibility:hidden] [will-change:transform]"
+                  />
+               </div>
+
+               {/* Sección 2: Contenido Central de Texto */}
+               <div className="text-center relative z-20 flex-1 min-w-0 max-w-xl mx-auto px-1 sm:px-2 md:px-4">
+                  <img 
+                     src="/images/logo.png" 
+                     alt="Logo" 
+                     className="mx-auto block w-[clamp(85px,12vw,170px)] h-auto brightness-0 invert pb-2 sm:pb-3 md:pb-4" 
+                  />
+
+                  <p className="font-bodoni text-[clamp(16px,3.8vw,56px)] text-white leading-tight mb-2 sm:mb-3 md:mb-4">
+                     Ten la <span className="font-pinyon">libertad</span> de<br />
+                     usar lo que te haga <br />
+                     sentir <span className="font-pinyon">única</span>
+                  </p>
+
+                  <div className="mt-1 sm:mt-2">
+                     <span className="bg-[#e83d9c] rounded-full font-poppins text-[clamp(9px,1.3vw,18px)] font-bold italic text-white px-[clamp(8px,1.6vw,24px)] py-[clamp(3px,0.6vw,8px)] inline-block shadow-md whitespace-nowrap">
+                        Vestidos Curvy / Tallas Extra
+                     </span>
+                  </div>
+
+                  <span className="text-white block mt-1.5 sm:mt-2 font-medium text-[clamp(9px,1vw,14px)] tracking-wide opacity-90">
+                     @lamaschispa
+                  </span>
+               </div>
+
+               {/* Sección 3: Esfera arriba y Cuadro abajo (Derecha) */}
+               <div className="flex flex-col items-center justify-center flex-shrink-0 z-10">
+                  <img 
+                     src="/images/bola disco.png" 
+                     alt="Esfera disco derecha" 
+                     className="w-[clamp(28px,6vw,80px)] h-auto object-contain drop-shadow-md mb-2 sm:mb-3 md:mb-4 pointer-events-none scale-x-[-1] [backface-visibility:hidden]" 
                   />
                   <img 
                      src="/images/cuadro de fotos 2.png" 
                      alt="Cuadro de fotos derecha" 
-                     className="w-36 sm:w-56 h-auto object-contain rotate-[6deg] drop-shadow-lg [backface-visibility:hidden]"
+                     className="w-[clamp(65px,19vw,290px)] h-auto object-contain rotate-[6deg] md:rotate-[8deg] drop-shadow-2xl [backface-visibility:hidden] [will-change:transform]"
                   />
                </div>
             </div>
@@ -115,13 +169,13 @@ export default function Home() {
             </div>
 
             {/* Galería de fotos horizontal en una nueva línea */}
-            <div className="flex items-center gap-3 md:gap-0 md:justify-between mt-6 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-0 md:justify-between mt-6 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
                {recientes.map((vestido) => (
-                  <Link key={vestido.id} to={`/producto/${vestido.id}`} className="flex-shrink-0 snap-start">
+                  <Link key={vestido.id} to={`/producto/${vestido.id}`} className="flex-shrink-0 snap-start w-[calc((100vw-48px)/3)] sm:w-36 md:w-45">
                      {vestido.imagenes?.length > 0 ? (
-                        <img src={'/images/' + vestido.imagenes[0]} alt={vestido.name} className="w-45 h-auto object-cover rounded-2xl shadow-sm" />
+                        <img src={'/images/' + vestido.imagenes[0]} alt={vestido.name} className="w-full aspect-[3/4] object-cover rounded-xl sm:rounded-2xl shadow-sm" />
                      ) : (
-                        <div className="w-45 aspect-[3/4] flex items-center justify-center text-4xl bg-gray-100 rounded-2xl shadow-sm">👗</div>
+                        <div className="w-full aspect-[3/4] flex items-center justify-center text-2xl sm:text-4xl bg-gray-100 rounded-xl sm:rounded-2xl shadow-sm">👗</div>
                      )}
                   </Link>
                ))}
@@ -130,10 +184,16 @@ export default function Home() {
 
          <div className="px-4 sm:px-6 md:px-20 mt-10 md:mt-15 text-center">
             <span className="font-bodoni text-[30px] md:text-[50px]">¿Cómo Rentar?</span>
-            <div className="bg-[#fff8f5] p-5 sm:p-10 font-poppins mt-5 text-sm sm:text-base">
-               <div className="flex flex-col md:flex-row text-center justify-center gap-8 md:gap-40">
-                  <div className="flex flex-col items-center gap-3"><img src="/images/Artboard 1.png" alt="" className="max-w-[60%] sm:max-w-full h-auto" />Encuentra el vestido<br /> perfecto aquí en nuestro catalogo<br /> o fisicamente en nuestra tienda</div>
-                  <div className="flex flex-col items-center gap-3"><img src="/images/Artboard 2.png" alt="" className="max-w-[60%] sm:max-w-full h-auto" />Acude a nuestra tienda<br /> para medirtelo y separarlo</div>
+            <div className="bg-[#fff8f5] p-4 sm:p-8 md:p-10 font-poppins mt-5 text-xs sm:text-base">
+               <div className="flex flex-row text-center justify-center items-start gap-4 sm:gap-12 md:gap-24 lg:gap-40">
+                  <div className="flex-1 max-w-[190px] sm:max-w-[260px] md:max-w-xs flex flex-col items-center gap-2 sm:gap-3">
+                     <img src="/images/Artboard 1.png" alt="" className="w-16 sm:w-24 md:w-auto max-w-full h-auto" />
+                     <span>Encuentra el vestido <br className="hidden sm:inline" />perfecto aquí en nuestro catalogo <br className="hidden sm:inline" />o fisicamente en nuestra tienda</span>
+                  </div>
+                  <div className="flex-1 max-w-[190px] sm:max-w-[260px] md:max-w-xs flex flex-col items-center gap-2 sm:gap-3">
+                     <img src="/images/Artboard 2.png" alt="" className="w-18 sm:w-24 md:w-auto max-w-full h-auto" />
+                     <span>Acude a nuestra tienda <br className="hidden sm:inline" />para medirtelo y separarlo</span>
+                  </div>
                </div>
                <div className="flex flex-wrap text-center justify-center gap-x-5 gap-y-2 mt-8 md:mt-10 text-base md:text-xl items-baseline">
                   <div className="font-bodoni text-2xl md:text-3xl w-full md:w-auto">Tu Renta incluye:</div>
@@ -147,7 +207,7 @@ export default function Home() {
          {/* Sección Hola Hermosa con foto Flotada (float-right) y bordes ondulados laterales */}
          <div className="relative mt-10 md:mt-15 px-8 sm:px-10 md:px-24 block overflow-hidden py-8 md:py-10">
             {/* Bordes ondulados fucsia anchos con base sólida a la izquierda */}
-            <div className="absolute top-0 bottom-0 left-0 w-[50px] md:w-[70px] h-full pointer-events-none z-10 overflow-hidden">
+            {/* <div className="absolute top-0 bottom-0 left-0 w-[50px] md:w-[70px] h-full pointer-events-none z-10 overflow-hidden">
                <svg className="w-full h-full">
                   <defs>
                      <pattern id="scallop-left" x="0" y="0" width="150" height="120" patternUnits="userSpaceOnUse">
@@ -156,10 +216,10 @@ export default function Home() {
                   </defs>
                   <rect x="0" y="0" width="100%" height="100%" fill="url(#scallop-left)" />
                </svg>
-            </div>
+            </div> */}
 
             {/* Bordes ondulados fucsia anchos con base sólida a la derecha */}
-            <div className="absolute top-0 bottom-0 right-0 w-[50px] md:w-[70px] h-full pointer-events-none z-10 overflow-hidden">
+            {/* <div className="absolute top-0 bottom-0 right-0 w-[50px] md:w-[70px] h-full pointer-events-none z-10 overflow-hidden">
                <svg className="w-full h-full">
                   <defs>
                      <pattern id="scallop-right" x="0" y="0" width="150" height="120" patternUnits="userSpaceOnUse">
@@ -168,7 +228,7 @@ export default function Home() {
                   </defs>
                   <rect x="0" y="0" width="100%" height="100%" fill="url(#scallop-right)" />
                </svg>
-            </div>
+            </div> */}
 
             {/* Imagen flotada a la derecha */}
             <img 
@@ -178,7 +238,7 @@ export default function Home() {
             />
 
             {/* Título y Texto */}
-            <div className="text-left font-poppins text-gray-800 text-[15px] md:text-lg leading-relaxed">
+            <div className="text-left pl-3 font-poppins text-gray-800 text-[15px] md:text-lg leading-relaxed">
                <span className="font-bodoni italic text-[32px] sm:text-[40px] md:text-[50px] text-[#9c2868] block leading-tight">
                   Hola, hermosa 💖
                </span>
@@ -187,43 +247,38 @@ export default function Home() {
                </span>
                
                <p className="mb-4">
-                  Soy Abi Rosas, la fundadora de <span className="font-bold">La Más Chispa</span>, y quiero contarte por qué 
-                  este espacio está pensado exclusivamente para mujeres de talla grande.
+                  ¡Hola! Soy Abi, y quiero contarte cómo nació La Más Chispa. 💗
                </p>
                <p className="mb-4">
-                  Gran parte de mi vida he sido una chica plus size y, si tú también lo eres, seguramente sabes que encontrar ropa
-                  no siempre es sencillo. Buscar variedad de tallas, encontrar diseños modernos y sentirte cómoda con lo que llevas
-                  puesto muchas veces se convierte en toda una odisea.
+                  Durante gran parte de mi vida he sido una chica plus size, así que sé lo complicado que puede ser encontrar ropa bonita, 
+                  moderna y que realmente vaya con tu estilo.
                </p>
                <p className="mb-4">
-                  En diciembre de 2023 me invitaron a una boda. Hacía muchos años que no rentaba un vestido y
-                  pensé que sería una experiencia emocionante... pero fue todo lo contrario.
-                  Me encontré con muy pocas opciones en mi talla, diseños que no representaban mi estilo y una
-                  sensación constante de que tenía que conformarme con "lo que había", en lugar de elegir lo que
-                  realmente me hacía sentir hermosa. A eso se sumaron algunos comentarios y actitudes que
-                  hicieron que una experiencia que debía ser especial terminara siendo incómoda.
-                  Al platicarlo con varias amigas, descubrí que muchas habían vivido exactamente lo mismo. Lo
-                  más triste fue escuchar que ya lo tenían normalizado, porque pensaban que simplemente
-                  "así son las cosas".
-               </p>
-               <p className="mb-4">Pero yo no estaba de acuerdo.</p>
-               <p className="mb-4">
-                  Ser una mujer de talla grande no debería significar tener menos opciones, conformarte con un vestido 
-                  que no te encanta o sentirte juzgada. Al contrario. Cada evento importante merece ser vivido con ilusión, 
-                  seguridad y emoción. Porque, seamos sinceras... ¿cada cuándo tenemos la oportunidad de usar un vestido de noche?
-               </p>
-               <p className="mb-4">Tú mereces elegir el vestido que te enamore, no el único que te quede.</p>
-               <p className="font-bold mb-4">Y así nació La Más Chispa.</p>
-               <p className="mb-4">
-                  El 1 de abril de 2024, con 25 años, decidí abrir un espacio donde las mujeres plus size pudiéramos vivir una 
-                  experiencia diferente: un lugar donde hubiera variedad de estilos, donde nos sintiéramos cómodas, escuchadas y 
-                  bienvenidas; donde nadie tuviera que esconder su cuerpo para sentirse hermosa. Más que rentar vestidos, 
-                  quiero que cada mujer que entre por nuestra puerta salga sintiéndose segura, feliz y con la emoción de haber 
-                  encontrado <span className="font-bold">ese vestido perfecto</span>.
+                  En diciembre de 2023 me invitaron a una boda y, después de muchos años sin rentar un vestido, 
+                  pensé que sería una experiencia bonita. Pero me encontré con muy poquitas opciones en mi talla, 
+                  vestidos anticuados y una sensación de tener que conformarme con lo que había.
                </p>
                <p className="mb-4">
-                  Gracias por estar aquí y por formar parte de este sueño. Espero conocerte muy pronto y ayudarte a encontrar 
-                  el vestido con el que te sientas tan increíble como realmente eres.
+                  Cuando platiqué de esto con amigas, me di cuenta de que no era la única. Muchas habíamos pasado por situaciones similares y, 
+                  tristemente, ya lo veíamos como algo normal.
+
+                  Y yo pensaba: ¿por qué tenemos que conformarnos? 
+                  ¿Por qué no podemos encontrar un vestido que realmente nos encante y con el que nos sintamos increíbles?
+               </p>
+               <p className="mb-4">
+                  Fue así como nació La Más Chispa, el 1 de abril de 2024. 
+                  Con 25 años decidí crear ese espacio que a mí me hubiera gustado encontrar: 
+                  un lugar donde las chicas de talla grande pudiéramos elegir entre diferentes estilos, sentirnos cómodas, 
+                  disfrutar el proceso y, sobre todo, no sentir que tenemos que esconder nuestro cuerpo para vernos bonitas.
+               </p>
+               <p className="mb-4">
+                  Mi intención va mucho más allá de rentar vestidos. Quiero que cada chica que nos visite se emocione al encontrar su vestido, 
+                  que se mire al espejo y diga: ¡este es! Que se sienta bonita, segura y feliz con lo que ve.
+               </p>
+               <p className="mb-4">
+                  Porque hay algo que quiero que siempre recuerdes: mereces elegir el vestido que te enamora, no el que te queda.
+                  Gracias por formar parte de este sueño y por permitirnos acompañarte en momentos tan especiales.
+                  ¡Espero verte pronto en La Más Chispa!
                </p>
                <p>Con cariño,</p>
                <p className="font-bold text-xl">Abi Rosas</p>
@@ -234,7 +289,7 @@ export default function Home() {
          </div>
 
          {/* Seccion de Tu eres nuestra mejor modelo */}
-         <div className="relative mt-16 sm:mt-20 md:mt-24 bg-[#ffb727] text-center pt-8 sm:pt-12 md:pt-14 pb-28 sm:pb-36 md:pb-48 lg:pb-56">
+         <div className="relative mt-16 sm:mt-20 md:mt-24 bg-[#ffb727] text-center pt-8 sm:pt-12 md:pt-14 pb-32 sm:pb-52 md:pb-64 lg:pb-48">
             {/* Borde ondulado en la parte superior */}
             <div className="absolute top-0 left-0 w-full overflow-hidden leading-none -translate-y-[99%] pointer-events-none">
                <svg className="relative block w-full h-8 sm:h-12 md:h-16 lg:h-20 text-[#ffb727]" viewBox="0 0 1200 120" preserveAspectRatio="none">
@@ -243,34 +298,130 @@ export default function Home() {
             </div>
 
             <div className="px-4 flex flex-col items-center justify-center">
-               <h2 className="font-bodoni italic text-[#9c2868] text-3xl sm:text-5xl md:text-6xl lg:text-[64px] leading-tight mb-6 md:mb-8 font-normal">
+               <h2 className="font-bodoni italic text-[#9c2868] text-3xl sm:text-4xl md:text-5xl lg:text-[60px] leading-tight mb-4 sm:mb-6 font-normal">
                   ¡Tu eres nuestra mejor modelo!
                </h2>
                
-               <div className="flex flex-col items-center">
-                  <div className="bg-[#e83d9c] text-white font-bodoni text-xl sm:text-3xl md:text-4xl lg:text-[44px] px-8 sm:px-12 md:px-16 py-2.5 sm:py-3.5 rounded-full z-10 shadow-sm">
+               <div className="flex flex-col items-center gap-3 sm:gap-4 md:gap-5">
+                  <div className="bg-[#e83d9c] text-white font-bodoni text-lg sm:text-2xl md:text-3xl lg:text-[38px] px-6 sm:px-10 md:px-14 py-2 sm:py-3 rounded-full shadow-sm">
                      Siguenos en nuestras redes
                   </div>
-                  <div className="bg-[#e83d9c] text-white font-bodoni italic text-lg sm:text-2xl md:text-3xl lg:text-[36px] px-8 sm:px-10 md:px-14 py-1.5 sm:py-2.5 rounded-full -mt-3 sm:-mt-4 z-0 shadow-sm">
-                     @lamaschispa
+                  <div className="bg-[#e83d9c] text-white px-5 sm:px-8 md:px-10 py-1.5 sm:py-2.5 rounded-full shadow-sm flex items-center justify-center gap-2.5 sm:gap-4 whitespace-nowrap">
+                     <span className="font-bodoni italic text-base sm:text-xl md:text-2xl lg:text-[30px]">
+                        @lamaschispa
+                     </span>
+                     <div className="flex items-center gap-2 sm:gap-3">
+                        <a 
+                           href="https://www.instagram.com/lamaschispa?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" 
+                           target="_blank" 
+                           rel="noreferrer" 
+                           className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white text-[#e83d9c] flex items-center justify-center text-sm sm:text-base md:text-lg hover:scale-110 hover:bg-[#9c2868] hover:text-white transition-all shadow-sm"
+                           aria-label="Instagram"
+                        >
+                           <FaInstagram />
+                        </a>
+                        <a 
+                           href="https://www.facebook.com/share/15crZa7MWF/?mibextid=wwXIfr" 
+                           target="_blank" 
+                           rel="noreferrer" 
+                           className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white text-[#e83d9c] flex items-center justify-center text-xs sm:text-sm md:text-base hover:scale-110 hover:bg-[#9c2868] hover:text-white transition-all shadow-sm"
+                           aria-label="Facebook"
+                        >
+                           <FaFacebookF />
+                        </a>
+                        <a 
+                           href="https://www.tiktok.com/@lamaschispa?_t=8sNw0oVLf1R&_r=1" 
+                           target="_blank" 
+                           rel="noreferrer" 
+                           className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-white text-[#e83d9c] flex items-center justify-center text-xs sm:text-sm md:text-base hover:scale-110 hover:bg-[#9c2868] hover:text-white transition-all shadow-sm"
+                           aria-label="TikTok"
+                        >
+                           <FaTiktok />
+                        </a>
+                     </div>
                   </div>
                </div>
             </div>
 
-            {/* Galería de fotos horizontal en 5 columnas con esquinas rectangulares superpuestas abajo */}
-            <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-2 sm:px-6 md:px-10 max-w-7xl mx-auto z-10">
-               <div className="grid grid-cols-5 gap-1.5 sm:gap-3 md:gap-4 lg:gap-5">
-                  <img src="/images/shineGold.jpg" alt="Vestido" className="w-full aspect-[3/4] object-cover rounded-none shadow-md" />
-                  <img src="/images/rosaTopacio.jpg" alt="Vestido" className="w-full aspect-[3/4] object-cover rounded-none shadow-md" />
-                  <img src="/images/redDress.jpg" alt="Vestido" className="w-full aspect-[3/4] object-cover rounded-none shadow-md" />
-                  <img src="/images/pinkDress.jpg" alt="Vestido" className="w-full aspect-[3/4] object-cover rounded-none shadow-md" />
-                  <img src="/images/goldPink.jpg" alt="Vestido" className="w-full aspect-[3/4] object-cover rounded-none shadow-md" />
+            {/* Carrusel de fotos de clientas superpuesto abajo (3 en celular, se adapta a las que quepan en tablet y PC) */}
+            <div className="absolute bottom-0 left-0 right-0 transform translate-y-1/2 px-2 sm:px-6 md:px-10 max-w-sm min-[580px]:max-w-2xl md:max-w-4xl lg:max-w-6xl mx-auto z-10">
+               <div className="relative">
+                  {/* Botón Anterior (solo cuando hay fotos ocultas fuera de pantalla) */}
+                  {maxIndex > 0 && (
+                     <button 
+                        type="button"
+                        onClick={prevCliente}
+                        className="absolute -left-2 sm:-left-4 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-white/95 text-[#9c2868] hover:bg-[#e83d9c] hover:text-white shadow-md flex items-center justify-center text-sm sm:text-base transition-all cursor-pointer border border-pink-100"
+                        aria-label="Foto anterior"
+                     >
+                        ❮
+                     </button>
+                  )}
+
+                  {/* Contenedor del Carrusel */}
+                  <div 
+                     className="overflow-hidden w-full px-1"
+                     onMouseEnter={() => setIsHovered(true)}
+                     onMouseLeave={() => setIsHovered(false)}
+                     onTouchStart={handleTouchStart}
+                     onTouchEnd={handleTouchEnd}
+                  >
+                     <div 
+                        className="flex transition-transform duration-500 ease-in-out"
+                        style={{
+                           transform: `translateX(-${clienteIndex * (100 / visibleCount)}%)`,
+                        }}
+                     >
+                        {fotosClientes.map((foto, index) => (
+                           <div 
+                              key={index} 
+                              className="flex-shrink-0 px-1 sm:px-2 md:px-2.5"
+                              style={{ width: `${100 / visibleCount}%` }}
+                           >
+                              <img 
+                                 src={foto} 
+                                 alt={`Cliente La Más Chispa ${index + 1}`} 
+                                 className="w-full aspect-[3/4] object-cover rounded-lg sm:rounded-xl shadow-lg"
+                              />
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+
+                  {/* Botón Siguiente (solo cuando hay fotos ocultas fuera de pantalla) */}
+                  {maxIndex > 0 && (
+                     <button 
+                        type="button"
+                        onClick={nextCliente}
+                        className="absolute -right-2 sm:-right-4 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-white/95 text-[#9c2868] hover:bg-[#e83d9c] hover:text-white shadow-md flex items-center justify-center text-sm sm:text-base transition-all cursor-pointer border border-pink-100"
+                        aria-label="Siguiente foto"
+                     >
+                        ❯
+                     </button>
+                  )}
+
+                  {/* Indicadores / Puntos (solo cuando hay más de 1 página de desplazamiento) */}
+                  {maxIndex > 0 && (
+                     <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
+                        {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
+                           <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setClienteIndex(idx)}
+                              className={`h-1.5 sm:h-2 rounded-full transition-all cursor-pointer ${
+                                 clienteIndex === idx ? 'w-5 sm:w-6 bg-[#e83d9c]' : 'w-1.5 sm:w-2 bg-gray-300 hover:bg-gray-400'
+                              }`}
+                              aria-label={`Ir al grupo ${idx + 1}`}
+                           />
+                        ))}
+                     </div>
+                  )}
                </div>
             </div>
          </div>
 
          {/* Espacio reservado para que las fotos que sobresalen no colisionen con lo que siga */}
-         <div className="h-16 sm:h-28 md:h-36 lg:h-44"></div>
+         <div className="h-28 sm:h-44 md:h-56 lg:h-48"></div>
 
          {/* Sección Visítanos */}
          <div className="px-6 md:px-20 py-10 md:py-16 max-w-7xl mx-auto">
@@ -347,10 +498,11 @@ export default function Home() {
          </div>
 
          {/* Footer */}
-         <footer className="bg-[#9c2868] text-white py-12 md:py-16 px-6 md:px-20 mt-12 md:mt-20">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-center md:items-start text-center md:text-left">
+         <footer className="bg-[#9c2868] text-white py-10 sm:py-12 md:py-14 lg:py-16 px-4 sm:px-6 md:px-10 lg:px-20 mt-12 md:mt-16">
+            <div className="max-w-7xl mx-auto grid grid-cols-2 min-[580px]:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 items-start text-left">
                {/* Columna 1: Enlaces */}
-               <div className="flex flex-col space-y-2 font-poppins text-sm md:text-base text-pink-100">
+               <div className="flex flex-col space-y-2 font-poppins text-xs sm:text-sm md:text-base text-pink-100">
+                  <span className="font-bodoni text-white text-sm sm:text-base md:text-lg font-semibold mb-1">Explora</span>
                   <Link to="/vestidos" className="hover:underline hover:text-white transition-colors">Catálogo</Link>
                   <Link to="/preguntas" className="hover:underline hover:text-white transition-colors">Preguntas Frecuentes</Link>
                   <Link to="/nosotras" className="hover:underline hover:text-white transition-colors">Nosotras</Link>
@@ -359,36 +511,39 @@ export default function Home() {
                </div>
 
                {/* Columna 2: Teléfono y Dirección */}
-               <div className="flex flex-col space-y-2 font-poppins text-sm md:text-base text-pink-100">
-                  <p className="font-semibold text-white text-base md:text-lg">81 2028 1520</p>
+               <div className="flex flex-col space-y-2 font-poppins text-xs sm:text-sm md:text-base text-pink-100">
+                  <span className="font-bodoni text-white text-sm sm:text-base md:text-lg font-semibold mb-1">Contacto</span>
+                  <p className="font-semibold text-white text-xs sm:text-sm md:text-base">81 2028 1520</p>
                   <p>
-                     Lunes a Viernes 11 a.m. - 8 p.m.<br />
-                     Sábados de 11 a.m. - 5 p.m.
+                     <span className="font-semibold text-white">Lunes a Viernes</span><br />
+                     11 a.m. - 8 p.m.<br /><br />
+                    <span className="font-semibold text-white">Sábados</span><br />
+                     11 a.m. - 5 p.m.
                   </p>
-                  <p className="pt-2">
+                  <p className="pt-1 font-semibold text-white">
                      Dr. Enrique C. Livas #250,<br />
                      Cumbres 1er. Sector, Mty, N.L.
                   </p>
                </div>
 
                {/* Columna 3: Logo e Iconos Sociales */}
-               <div className="flex flex-col items-center md:items-end justify-center space-y-4">
-                  <img src="/images/logo.png" alt="La Más Chispa" className="w-36 md:w-44 brightness-0 invert" />
-                  <div className="flex items-center gap-3">
-                     <a href="https://www.instagram.com/lamaschispa/profilecard/?igsh=emdmdXV3bm9vcW0=" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-xl hover:scale-105 transition-transform shadow">
+               <div className="col-span-2 min-[580px]:col-span-1 flex flex-col items-center min-[580px]:items-end justify-center space-y-3 pt-6 min-[580px]:pt-0 border-t border-pink-400/20 min-[580px]:border-t-0 text-center min-[580px]:text-right">
+                  <img src="/images/logo.png" alt="La Más Chispa" className="w-32 sm:w-36 md:w-44 brightness-0 invert" />
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                     <a href="https://www.instagram.com/lamaschispa/profilecard/?igsh=emdmdXV3bm9vcW0=" target="_blank" rel="noreferrer" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-lg sm:text-xl hover:scale-105 transition-transform shadow" aria-label="Instagram">
                         <FaInstagram />
                      </a>
-                     <a href="https://www.facebook.com/share/15crZa7MWF/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-lg hover:scale-105 transition-transform shadow">
+                     <a href="https://www.facebook.com/share/15crZa7MWF/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-base sm:text-lg hover:scale-105 transition-transform shadow" aria-label="Facebook">
                         <FaFacebookF />
                      </a>
-                     <a href="https://www.tiktok.com/@lamaschispa?_t=8sNw0oVLf1R&_r=1" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-lg hover:scale-105 transition-transform shadow">
+                     <a href="https://www.tiktok.com/@lamaschispa?_t=8sNw0oVLf1R&_r=1" target="_blank" rel="noreferrer" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-base sm:text-lg hover:scale-105 transition-transform shadow" aria-label="TikTok">
                         <FaTiktok />
                      </a>
-                     <a href="https://wa.me/528120281520" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-lg hover:scale-105 transition-transform shadow">
+                     <a href="https://wa.me/528120281520" target="_blank" rel="noreferrer" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#9c2868] flex items-center justify-center text-base sm:text-lg hover:scale-105 transition-transform shadow" aria-label="WhatsApp">
                         <FaWhatsapp />
                      </a>
                   </div>
-                  <span className="text-white font-bodoni italic text-lg md:text-xl">@lamaschispa</span>
+                  <span className="text-white font-bodoni italic text-base sm:text-lg md:text-xl">@lamaschispa</span>
                </div>
             </div>
          </footer>
