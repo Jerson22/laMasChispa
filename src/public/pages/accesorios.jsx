@@ -47,26 +47,28 @@ export default function Accesorios() {
    if (error) return <div className="error">Error: {error}</div>;
 
    return (
-      <div className="vestidos-container">
-         <h1 className="page-title">Accesorios</h1>
+      <div className="vestidos-container ">
+         <div className="text-center">
+            <h1 className="font-bodoni text-4xl sm:text-5xl md:text-6xl text-[#2c2c2c] tracking-[0.2em] font-normal mb-8 uppercase">Accesorios</h1>
+         </div>
 
-         <div className="filtros-container">
+         <div className="filtros-container max-[1023px]:flex-nowrap! max-[1023px]:gap-2! max-[1023px]:px-2.5!">
             <input 
                type="text" 
-               className="filtro-input"
+               className="filtro-input max-[1023px]:min-w-0! max-[1023px]:px-2.5! max-[1023px]:text-xs!"
                placeholder="Buscar por nombre o descripción..." 
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-            <select className="filtro-select" value={selectedTalla} onChange={(e) => setSelectedTalla(e.target.value)}>
+            <select className="filtro-select max-[1023px]:min-w-0! max-[1023px]:w-[28%]! max-[1023px]:px-1.5! max-[1023px]:text-xs!" value={selectedTalla} onChange={(e) => setSelectedTalla(e.target.value)}>
                <option value="">Todas las Tallas</option>
                {uniqueTallas.map(talla => (
                   <option key={talla} value={talla}>{talla}</option>
                ))}
             </select>
 
-            <select className="filtro-select" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
+            <select className="filtro-select max-[1023px]:min-w-0! max-[1023px]:w-[28%]! max-[1023px]:px-1.5! max-[1023px]:text-xs!" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
                <option value="">Todos los Colores</option>
                {uniqueColors.map(color => (
                   <option key={color} value={color}>{color}</option>

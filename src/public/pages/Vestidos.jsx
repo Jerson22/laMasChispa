@@ -69,19 +69,18 @@ const Vestidos = () => {
    return (
       <div className="w-full">
          {/* Banner Promocional "En La Más Chispa..." de ancho completo */}
-         <div className="relative w-full sm:rounded-bl-[200px] overflow-hidden bg-[#9c2868] mb-6 md:mb-10 shadow-xl md:min-h-[300px] flex items-end">
-            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-row items-end justify-between pt-4 sm:pt-10 md:pt-5 pb-0 pl-4 sm:pl-24 md:pl-20 pr-2 sm:pr-10 md:pr-5 gap-2 sm:gap-6 lg:gap-8">
+         <div className="relative w-full overflow-hidden bg-[#9c2868] mb-10 shadow-xl flex items-end">
+            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-row items-end justify-between pt-0 pb-0 pl-4 sm:pl-24 md:pl-20 pr-2 sm:pr-10 md:pr-5 gap-2 sm:gap-6 lg:gap-8">
                {/* Texto Izquierdo */}
-               <div className="flex-1 min-w-0 max-w-2xl text-left py-4 sm:py-10 md:py-5">
-                  <h2 className="font-bodoni text-lg sm:text-2xl md:text-4xl text-white italic leading-tight mb-0 min-[530px]:mb-3 md:mb-4">
-                     En La Más Chispa creemos que todas las mujeres merecen sentirse increíbles.
+               <div className="flex-1 min-w-0 max-w-2xl text-left py-3 sm:py-5 md:py-5">
+                  <h2 className="font-bodoni text-[13px] min-[530px]:text-[17px] md:text-4xl text-white leading-tight mb-2 sm:mb-4">
+                     <p className="italic">Tu cuerpo no tiene reglas para vestir.</p>
+                     <p className="font-bold">¡Aquí estás para encontrar ese vestido que te haga brillar!</p>
                   </h2>
-                  <p className="hidden md:block font-poppins text-base text-white/90 leading-relaxed mb-6 max-w-xl">
-                     Sin importar la talla, el cuerpo o las reglas que alguien más haya inventado. Aquí celebramos la autenticidad, la confianza y la libertad de usar lo que te haga sentir tú.
-                  </p>
+               
                   
                   {/* Badge Amarillo/Dorado */}
-                  <div className="hidden min-[530px]:inline-flex bg-[#fcad26] text-white font-poppins font-bold text-[10px] md:text-base px-3 md:px-6 py-1 md:py-2.5 rounded-full flex-wrap items-center gap-x-2 gap-y-0 md:gap-4 shadow-md">
+                  <div className="bg-[#fcad26] text-[#9c2868] font-poppins font-bold text-[6px] min-[530px]:text-[9px] lg:text-base px-1 sm:px-4 lg:px-6 py-1.5 lg:py-2.5 rounded-full inline-flex flex-wrap items-center gap-x-1 gap-y-0.5 sm:gap-x-3 lg:gap-4 shadow-md">
                      <span>Tu Renta incluye:</span>
                      <span>Tintorería</span>
                      <span>Ajustes</span>
@@ -90,7 +89,7 @@ const Vestidos = () => {
                </div>
 
                {/* Imagen de Modelos (amigas final.png que ya contiene el círculo rosa) */}
-               <div className="w-[36%] sm:w-[30%] lg:w-full shrink-0 max-w-[420px] lg:max-w-[500px] flex justify-end self-end">
+               <div className="w-[39%] min-[530px]:w-[34%] lg:w-full shrink-0 max-w-[420px] lg:max-w-[400px] flex justify-end self-end">
                   <img 
                      src="/images/amigas final.png" 
                      alt="Amigas La Más Chispa" 

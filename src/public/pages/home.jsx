@@ -205,7 +205,7 @@ export default function Home() {
          </div>
 
          {/* Sección Hola Hermosa con foto Flotada (float-right) y bordes ondulados laterales */}
-         <div className="relative mt-10 md:mt-15 px-8 sm:px-10 md:px-24 block overflow-hidden py-8 md:py-10">
+         <div className="relative mt-0 md:mt-0 px-4 sm:px-10 md:px-24 block overflow-hidden py-8 md:py-10">
             {/* Bordes ondulados fucsia anchos con base sólida a la izquierda */}
             {/* <div className="absolute top-0 bottom-0 left-0 w-[50px] md:w-[70px] h-full pointer-events-none z-10 overflow-hidden">
                <svg className="w-full h-full">
@@ -234,54 +234,53 @@ export default function Home() {
             <img 
                src="/images/YO2.png" 
                alt="Abi Rosas - La Más Chispa" 
-               className="block md:float-right mx-auto md:mx-0 mb-6 w-4/5 max-w-[260px] md:w-full md:max-w-md lg:max-w-[500px] h-auto object-contain -rotate-[10deg]"
+               className="block float-right ml-3 mb-2 w-[40%] max-w-[180px] sm:max-w-[300px] min-[1128px]:ml-0 min-[1128px]:mb-6 min-[1128px]:w-full min-[1128px]:max-w-[500px] h-auto object-contain -rotate-[10deg]"
             />
 
             {/* Título y Texto */}
-            <div className="text-left pl-3 font-poppins text-gray-800 text-[15px] md:text-lg leading-relaxed">
-               <span className="font-bodoni italic text-[32px] sm:text-[40px] md:text-[50px] text-[#9c2868] block leading-tight">
+            <div className="text-left pl-0 sm:pl-3 font-poppins text-gray-800 text-[15px] md:text-lg leading-relaxed">
+               <span className="font-bodoni italic text-[24px] sm:text-[30px] md:text-[36px] text-[#9c2868] block leading-tight">
                   Hola, hermosa 💖
                </span>
-               <span className="font-bodoni italic text-[32px] sm:text-[40px] md:text-[50px] text-[#9c2868] block leading-tight mb-6">
+               <span className="font-bodoni italic text-[24px] sm:text-[30px] md:text-[36px] text-[#9c2868] block leading-tight mb-6">
                   ¡Bienvenida a tu lugar seguro!
                </span>
                
-               <p className="mb-4">
-                  ¡Hola! Soy Abi, y quiero contarte cómo nació La Más Chispa. 💗
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
+                  Soy Abi Rosas, y quiero contarte cómo nació La Más Chispa. 💗
                </p>
-               <p className="mb-4">
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
                   Durante gran parte de mi vida he sido una chica plus size, así que sé lo complicado que puede ser encontrar ropa bonita, 
                   moderna y que realmente vaya con tu estilo.
                </p>
-               <p className="mb-4">
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
                   En diciembre de 2023 me invitaron a una boda y, después de muchos años sin rentar un vestido, 
                   pensé que sería una experiencia bonita. Pero me encontré con muy poquitas opciones en mi talla, 
                   vestidos anticuados y una sensación de tener que conformarme con lo que había.
                </p>
-               <p className="mb-4">
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
                   Cuando platiqué de esto con amigas, me di cuenta de que no era la única. Muchas habíamos pasado por situaciones similares y, 
                   tristemente, ya lo veíamos como algo normal.
 
                   Y yo pensaba: ¿por qué tenemos que conformarnos? 
                   ¿Por qué no podemos encontrar un vestido que realmente nos encante y con el que nos sintamos increíbles?
                </p>
-               <p className="mb-4">
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
                   Fue así como nació La Más Chispa, el 1 de abril de 2024. 
                   Con 25 años decidí crear ese espacio que a mí me hubiera gustado encontrar: 
                   un lugar donde las chicas de talla grande pudiéramos elegir entre diferentes estilos, sentirnos cómodas, 
                   disfrutar el proceso y, sobre todo, no sentir que tenemos que esconder nuestro cuerpo para vernos bonitas.
                </p>
-               <p className="mb-4">
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
                   Mi intención va mucho más allá de rentar vestidos. Quiero que cada chica que nos visite se emocione al encontrar su vestido, 
                   que se mire al espejo y diga: ¡este es! Que se sienta bonita, segura y feliz con lo que ve.
                </p>
-               <p className="mb-4">
+               <p className="mb-2 sm:mb-4 text-xs sm:text-base">
                   Porque hay algo que quiero que siempre recuerdes: mereces elegir el vestido que te enamora, no el que te queda.
                   Gracias por formar parte de este sueño y por permitirnos acompañarte en momentos tan especiales.
-                  ¡Espero verte pronto en La Más Chispa!
                </p>
-               <p>Con cariño,</p>
-               <p className="font-bold text-xl">Abi Rosas</p>
+               {/* <p className="text-xs sm:text-base">Con cariño,</p> */}
+               <p className="font-bold text-xs sm:text-base">¡Espero verte pronto en La Más Chispa!</p>
             </div>
 
             {/* Clearfix para evitar desbordamientos */}
@@ -289,7 +288,7 @@ export default function Home() {
          </div>
 
          {/* Seccion de Tu eres nuestra mejor modelo */}
-         <div className="relative mt-16 sm:mt-20 md:mt-24 bg-[#ffb727] text-center pt-8 sm:pt-12 md:pt-14 pb-32 sm:pb-52 md:pb-64 lg:pb-48">
+         <div className="relative mt-5 sm:mt-20 md:mt-24 bg-[#ffb727] text-center pt-8 sm:pt-12 md:pt-14 pb-32 sm:pb-52 md:pb-64 lg:pb-48">
             {/* Borde ondulado en la parte superior */}
             <div className="absolute top-0 left-0 w-full overflow-hidden leading-none -translate-y-[99%] pointer-events-none">
                <svg className="relative block w-full h-8 sm:h-12 md:h-16 lg:h-20 text-[#ffb727]" viewBox="0 0 1200 120" preserveAspectRatio="none">

@@ -41,6 +41,7 @@ export default function Layout() {
             </button>
             <div className={`nav-right ${open ? "open" : ""} items-center gap-5`}>
                <Link to="/vestidos" onClick={() => setOpen(false)}>Vestidos</Link>
+               <Link to="/accesorios" onClick={() => setOpen(false)}>Accesorios</Link>
                <Link to="/talla" onClick={() => setOpen(false)}>¿Cuál es mi talla?</Link>
                <Link to="/preguntas" onClick={() => setOpen(false)}>Preguntas</Link>
                <Link to="/contacto" onClick={() => setOpen(false)}>Contacto</Link>

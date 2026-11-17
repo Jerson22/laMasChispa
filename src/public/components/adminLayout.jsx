@@ -64,13 +64,13 @@ export default function AdminLayout() {
       }`;
 
    return (
-      <div className="group flex min-h-screen flex-col lg:flex-row bg-[#f9a8d4]">
+      <div className="group flex min-h-screen flex-col min-[1291px]:flex-row bg-[#f9a8d4]">
 
          {/* ==========================================
-             1. BARRA ESCRITORIO (hidden lg:flex)
+             1. BARRA ESCRITORIO (hidden min-[1291px]:flex)
              Solo se muestra en pantallas grandes (computadoras)
             ========================================== */}
-         <aside className="hidden lg:flex print:hidden w-[180px] bg-[#fff4fb] text-gray-800 py-6 px-4 sticky top-[90px] h-[calc(100vh-90px)] border-r border-purple-100 flex-col gap-5 box-border">
+         <aside className="hidden min-[1291px]:flex print:hidden w-[180px] bg-[#fff4fb] text-gray-800 py-6 px-4 sticky top-[90px] h-[calc(100vh-90px)] border-r border-purple-100 flex-col gap-5 box-border">
             <h2 className="text-[1.2rem] m-0 pl-3 text-pink-600 font-bold">
                Panel Admin
             </h2>
@@ -101,7 +101,7 @@ export default function AdminLayout() {
             ========================================== */}
          <nav className="
             fixed bottom-0 left-0 right-0 h-16 bg-[#fff4fb] border-t border-purple-100 z-50 
-            flex flex-nowrap overflow-x-auto snap-x scrollbar-none lg:hidden print:hidden
+            flex flex-nowrap overflow-x-auto snap-x scrollbar-none min-[1291px]:hidden print:hidden
             group-has-[input:focus]:hidden group-has-[textarea:focus]:hidden
          ">
             <NavLink to="/admin" end className={mobileLinkStyles}>
@@ -148,7 +148,7 @@ export default function AdminLayout() {
              3. CONTENEDOR DINÁMICO DEL ADMIN
              Agregamos pb-20 en móvil para que la barra inferior no tape los formularios
             ========================================== */}
-         <main className="flex-1 p-5 pb-20 lg:pb-5 bg-[#f9a8d4]">
+         <main className="flex-1 p-5 pb-20 min-[1291px]:pb-5 bg-[#f9a8d4]">
             <Outlet context={{ token }} />
          </main>
       </div>

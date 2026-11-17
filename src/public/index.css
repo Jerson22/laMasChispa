@@ -711,8 +711,8 @@ body {
 }
 
 
-/* ===== RESPONSIVO - Móvil ===== */
-@media (max-width: 768px) {
+/* ===== RESPONSIVO - Navbar (hamburguesa) hasta 1290px ===== */
+@media (max-width: 1290px) {
    .navbar {
       flex-wrap: wrap;
       padding: 6px 12px;
@@ -749,6 +749,17 @@ body {
       font-size: 1.5rem;
    }
 
+   .nav-left img {
+      width: 150px;
+   }
+
+   .nav-right a {
+      font-size: 0.95rem;
+   }
+}
+
+/* ===== RESPONSIVO - Móvil ===== */
+@media (max-width: 768px) {
    .home-container {
       margin: 10px 10px;
       padding: 10px 10px;
@@ -760,14 +771,6 @@ body {
 
    .home-container p {
       font-size: 1.3rem;
-   }
-
-   .nav-left img {
-      width: 150px;
-   }
-
-   .nav-right a {
-      font-size: 0.95rem;
    }
 
    .vestidos-grid {
